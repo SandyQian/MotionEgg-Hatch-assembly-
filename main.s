@@ -11,9 +11,12 @@ start:
 	movlb 0x0F
 	
 	bsf REPU   ;does attaching a=1 at the end same as setting BSR?
-	clrf LATE, 1
+	
+	
 	movlw 0x0F
 	movwf TRISE, A    ;0-3 inputs and 4-7 outputs ;pull-up reg set properly 
+	
+	clrf LATE,1
 	
 	movlw 	0x0
 	movwf	TRISC, A
