@@ -13,14 +13,14 @@ myArray:    ds 0x80 ; reserve 128 bytes for message data
 psect	data    
 	; ******* myTable, data in programme memory, and its length *****
 myTable:
-	db	'H','e','l','l','o',' ','W','o','r','l','d','!',0x0a
+	db	'H','e','l','l','o',' ','W','o','r','l','d','!',0x0a         ;Each character is represented by its ASCII code
 					; message, plus carriage return
-	myTable_l   EQU	13	; length of data
-	align	2
+	myTable_l   EQU	12	; length of data
+	align	2     ;What does this line do?
     
 psect	code, abs	
 rst: 	org 0x0
- 	goto	setup
+ 	goto	setup    ;why 'go to' is needed here?
 
 	; ******* Programme FLASH read Setup Code ***********************
 setup:	bcf	CFGS	; point to Flash program memory  
@@ -30,6 +30,7 @@ setup:	bcf	CFGS	; point to Flash program memory
 	goto	start
 	
 	; ******* Main programme ****************************************
+	; moving table from program memory to RAM
 start: 	lfsr	0, myArray	; Load FSR0 with address in RAM	
 	movlw	low highword(myTable)	; address of data in PM
 	movwf	TBLPTRU, A		; load upper bits to TBLPTRU
@@ -43,15 +44,22 @@ loop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
 	decfsz	counter, A		; count down to zero
 	bra	loop		; keep going until finished
-		
-	movlw	myTable_l	; output message to UART
-	lfsr	2, myArray
+	
+	; output message to UART
+	movlw	0x01	
+	lfsr	2, myArray      ; Load file select register with content of myArray. '2' is the labelling number of FS reg being used 
 	call	UART_Transmit_Message
 
-	movlw	myTable_l	; output message to LCD
-	addlw	0xff		; don't send the final carriage return to LCD
-	lfsr	2, myArray
-	call	LCD_Write_Message
+	; Clear the LCD display?
+	movlw   0x01    ; Command for clearing the display (see LCD instruction table)
+	lfsr    2, myArray
+	call    LCD_Write_Message
+	
+	; output message to LCD
+	;movlw	myTable_l	
+	;addlw	0xff		; adjust length value of the message sent (don't send the final carriage return to LCD)
+	;lfsr	2, myArray
+	;call	LCD_Write_Message
 
 	goto	$		; goto current line in code
 
