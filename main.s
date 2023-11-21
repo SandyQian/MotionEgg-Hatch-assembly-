@@ -1,7 +1,7 @@
 #include <xc.inc>
 
 extrn	UART_Setup, UART_Transmit_Message  ; external subroutines
-extrn	LCD_Setup, LCD_Write_Message
+extrn	LCD_Setup, LCD_Write_Message, LCD_Clear_Display
 	
 psect	udata_acs   ; reserve data space in access ram
 counter:    ds 1    ; reserve one byte for a counter variable
@@ -46,14 +46,31 @@ loop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	bra	loop		; keep going until finished
 	
 	; output message to UART
-	movlw	0x01	
+	movlw	0x00	
 	lfsr	2, myArray      ; Load file select register with content of myArray. '2' is the labelling number of FS reg being used 
 	call	UART_Transmit_Message
 
+	; output message to LCD
+	movlw	myTable_l	
+	addlw	0xff		; adjust length value of the message sent (don't send the final carriage return to LCD)
+	lfsr	2, myArray
+	call	LCD_Write_Message
+	call    hugedelay
+	
+	; Clear the LCD display
+	call LCD_Clear_Display
+	call hugedelay
+	
+	; output message to LCD
+	movlw	myTable_l	
+	addlw	0xff		; adjust length value of the message sent (don't send the final carriage return to LCD)
+	lfsr	2, myArray
+	call	LCD_Write_Message
+	call hugedelay
+	
 	; Clear the LCD display?
-	movlw   0x01    ; Command for clearing the display (see LCD instruction table)
-	lfsr    2, myArray
-	call    LCD_Write_Message
+	call LCD_Clear_Display
+	call hugedelay
 	
 	; output message to LCD
 	;movlw	myTable_l	
@@ -67,5 +84,60 @@ loop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 delay:	decfsz	delay_count, A	; decrement until zero
 	bra	delay
 	return
+	
+bdelay: 
+    call delay
+    call delay
+    call delay
+    call delay
+    call delay
+    return
+    
+bbdelay: 
+    call bdelay
+    call bdelay
+    call bdelay
+    call bdelay
+    call bdelay
+    call bdelay
+    call bdelay
+    call bdelay
+    call bdelay
+    call bdelay
+    return
+
+hugedelay: 
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    call bbdelay
+    return
+    
 
 	end	rst
