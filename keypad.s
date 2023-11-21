@@ -2,6 +2,7 @@
 
 psect	code, abs
 	low_bits:   ds 1
+	keyval:     ds 1
     
     
 	
@@ -23,14 +24,28 @@ start:
 	
 	call bbdelay
 	
-	movff 
+	movff PORTE, low_bits
+	
+	movlw 0xF0
+	movwf TRISE, A
+	
+	call bbdelay
+	
+	movf PORTE, W, A
+	
+	iorwf low_bits, W, A
+	movwf keyval, A
+	
+	
+	
+	
 	
 	
 	
 	movlw 	0x0
 	movwf	TRISC, A
 	
-	bra 	test
+	
 ;loop:
 	;movff 	0x06, PORTC
 	;incf 	0x06, W, A
