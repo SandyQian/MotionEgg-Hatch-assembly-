@@ -17,6 +17,7 @@
       <itemPath>UART.s</itemPath>
       <itemPath>LCD.s</itemPath>
       <itemPath>keypad.s</itemPath>
+      <itemPath>delay.s</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
