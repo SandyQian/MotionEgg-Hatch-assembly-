@@ -1,11 +1,15 @@
 #include <xc.inc>
-
+	
+global	keyval, low_bits
 extrn	UART_Setup, UART_Transmit_Message  ; external subroutines
-extrn	LCD_Setup, LCD_Write_Message, LCD_Clear_Display
+extrn	LCD_Setup, LCD_Write_Message
+;extrn   delay, bdelay, bbdelay, huge   ;import does not work...
 	
 psect	udata_acs   ; reserve data space in access ram
 counter:    ds 1    ; reserve one byte for a counter variable
 delay_count:ds 1    ; reserve one byte for counter in the delay routine
+low_bits:   ds 1
+keyval:     ds 1
     
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 myArray:    ds 0x80 ; reserve 128 bytes for message data
@@ -13,131 +17,82 @@ myArray:    ds 0x80 ; reserve 128 bytes for message data
 psect	data    
 	; ******* myTable, data in programme memory, and its length *****
 myTable:
-	db	'H','e','l','l','o',' ','W','o','r','l','d','!',0x0a         ;Each character is represented by its ASCII code
+	db	'H','e','l','l','o',' ','W','o','r','l','d','!',0x0a
 					; message, plus carriage return
-	myTable_l   EQU	12	; length of data
-	align	2     ;What does this line do?
-    
-psect	code, abs	
-rst: 	org 0x0
- 	goto	setup    ;why 'go to' is needed here?
+	myTable_l   EQU	13	; length of data
+	align	2
 
-	; ******* Programme FLASH read Setup Code ***********************
-setup:	bcf	CFGS	; point to Flash program memory  
-	bsf	EEPGD 	; access Flash program memory
-	call	UART_Setup	; setup UART
-	call	LCD_Setup	; setup UART
+psect	code, abs
+	
+main:
+	org	0x0
 	goto	start
-	
-	; ******* Main programme ****************************************
-	; moving table from program memory to RAM
-start: 	lfsr	0, myArray	; Load FSR0 with address in RAM	
-	movlw	low highword(myTable)	; address of data in PM
-	movwf	TBLPTRU, A		; load upper bits to TBLPTRU
-	movlw	high(myTable)	; address of data in PM
-	movwf	TBLPTRH, A		; load high byte to TBLPTRH
-	movlw	low(myTable)	; address of data in PM
-	movwf	TBLPTRL, A		; load low byte to TBLPTRL
-	movlw	myTable_l	; bytes to read
-	movwf 	counter, A		; our counter register
-loop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
-	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
-	decfsz	counter, A		; count down to zero
-	bra	loop		; keep going until finished
-	
-	; output message to UART
-	movlw	0x00	
-	lfsr	2, myArray      ; Load file select register with content of myArray. '2' is the labelling number of FS reg being used 
-	call	UART_Transmit_Message
 
-	; output message to LCD
-	movlw	myTable_l	
-	addlw	0xff		; adjust length value of the message sent (don't send the final carriage return to LCD)
-	lfsr	2, myArray
-	call	LCD_Write_Message
-	call    hugedelay
+	org	0x100		    ; Main code starts here at address 0x100
+start:
+    
 	
-	; Clear the LCD display
-	call LCD_Clear_Display
+	movlb 0x0F  ;BSR --> Bank 15
+	bsf REPU   ;Enable pull-up resistors (Q:does attaching a=1 at the end same as setting BSR?)
+	movlb 0x0F  ;BSR --> Bank 15
+	
+	movlw 0x0F
+	movwf TRISE, A    ;0-3 inputs and 4-7 outputs ;pull-up reg set properly 
+	clrf LATE, A
+	movlw 	0x0
+	movwf	TRISD, A
+	
+	call hugedelay
+	movff PORTE, low_bits, A
+	
+	movlw 0xF0
+	movwf TRISE, A
+	
 	call hugedelay
 	
-	; output message to LCD
-	movlw	myTable_l	
-	addlw	0xff		; adjust length value of the message sent (don't send the final carriage return to LCD)
-	lfsr	2, myArray
-	call	LCD_Write_Message
-	call hugedelay
+	movf PORTE, W, A
 	
-	; Clear the LCD display?
-	call LCD_Clear_Display
-	call hugedelay
+	iorwf low_bits, W, A
+	movwf keyval, A
 	
-	; output message to LCD
-	;movlw	myTable_l	
-	;addlw	0xff		; adjust length value of the message sent (don't send the final carriage return to LCD)
-	;lfsr	2, myArray
-	;call	LCD_Write_Message
+	call hugedelay
+	nop
+	movf keyval, W, A
+	movwf PORTD, A
+	
+	call bbdelay
+	goto 	0x0		    ; Re-run program from start
+	
 
-	goto	$		; goto current line in code
-
-	; a delay subroutine if you need one, times around loop in delay_count
-delay:	decfsz	delay_count, A	; decrement until zero
-	bra	delay
+delay:
+	decfsz 0xFF, A
+	bra delay 
 	return
 	
 bdelay: 
-    call delay
-    call delay
-    call delay
-    call delay
-    call delay
-    return
-    
+	call delay
+	call delay
+	call delay
+	call delay
+	call delay
+	call delay
+	return 
+	
 bbdelay: 
-    call bdelay
-    call bdelay
-    call bdelay
-    call bdelay
-    call bdelay
-    call bdelay
-    call bdelay
-    call bdelay
-    call bdelay
-    call bdelay
-    return
+	call bdelay
+	call bdelay
+	call bdelay
+	call bdelay
+	call bdelay
+	call bdelay
+	return 
 
 hugedelay: 
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    call bbdelay
-    return
-    
+	call bbdelay 
+	call bbdelay    ;C:\Program Files\Microchip\xc8\v2.45\pic\include\proc
+        call bbdelay 
+	return
 
-	end	rst
+	end	main
+
+	
