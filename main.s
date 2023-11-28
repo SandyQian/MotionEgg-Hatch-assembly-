@@ -2,7 +2,7 @@
 	
 global	keyval, low_bits
 extrn	UART_Setup, UART_Transmit_Message  ; external subroutines
-extrn	LCD_Setup, LCD_Write_Message
+extrn	LCD_Setup, LCD_Write_Message, LCD_Clear_Display
 ;extrn   delay, bdelay, bbdelay, huge   ;import does not work...
 	
 psect	udata_acs   ; reserve data space in access ram
@@ -25,13 +25,13 @@ myTable:
 psect	code, abs
 	
 main:
-	org	0x0
-	goto	start
-
-	org	0x100		    ; Main code starts here at address 0x100
-start:
+    org 0x0
+    goto start
     
+    org 0x100
+start:		    ; Main code starts here at address 0x100
 	
+	; ******* Main program (the Keypad part) *****
 	movlb 0x0F  ;BSR --> Bank 15
 	bsf REPU   ;Enable pull-up resistors (Q:does attaching a=1 at the end same as setting BSR?)
 	movlb 0x0F  ;BSR --> Bank 15
@@ -60,12 +60,79 @@ start:
 	movf keyval, W, A
 	movwf PORTD, A
 	
-	call bbdelay
-	goto 	0x0		    ; Re-run program from start
+b_1:
+	movlw 0x77
+	CPFSEQ PORTD, A
+	bra b_c
+	call LCDs
+	call outLCD
+	call hugedelay 
+	goto 0x0
 	
+b_c:
+	movlw 0xEE
+	CPFSEQ PORTD, A
+	goto 0x0
+	call LCDs
+	call clearLCD
+	call hugedelay 
+	goto 	0x0
+	
+	
+	
+			    ; Re-run program from start
+	
+	; ******* Main program (the LCD part) *****
+	; moving table from program memory to RAM
+		; ******* Programme FLASH read Setup Code ***********************
+LCDs:	
+	bcf	CFGS	; point to Flash program memory  
+	bsf	EEPGD 	; access Flash program memory
+	call	UART_Setup	; setup UART
+	call	LCD_Setup	; setup UART
+	goto	LCDtable_read
+
+LCDtable_read:
+	lfsr	0, myArray	; Load FSR0 with address in RAM	
+	movlw	low highword(myTable)	; address of data in PM
+	movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+	movlw	high(myTable)	; address of data in PM
+	movwf	TBLPTRH, A		; load high byte to TBLPTRH
+	movlw	low(myTable)	; address of data in PM
+	movwf	TBLPTRL, A		; load low byte to TBLPTRL
+	movlw	myTable_l	; bytes to read
+	movwf 	counter, A		; our counter register
+	
+	
+loop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
+	decfsz	counter, A		; count down to zero
+	bra	loop		; keep going until finished
+	return
+	
+	 
+outUART:			; output message to UART
+	movlw	0x00	
+	lfsr	2, myArray      ; Load file select register with content of myArray. '2' is the labelling number of FS reg being used 
+	call	UART_Transmit_Message
+	return 
+
+	
+outLCD:				; output message to LCD
+	movlw	myTable_l	
+	addlw	0xff		; adjust length value of the message sent (don't send the final carriage return to LCD)
+	lfsr	2, myArray
+	call	LCD_Write_Message
+	return
+
+clearLCD:			    ; Clear the LCD display
+	call LCD_Clear_Display
+	return
+	
+	;goto	$		; goto current line in code
 
 delay:
-	decfsz 0xFF, A
+        decfsz 0xFF, A
 	bra delay 
 	return
 	
@@ -78,7 +145,7 @@ bdelay:
 	call delay
 	return 
 	
-bbdelay: 
+bbdelay:                                           
 	call bdelay
 	call bdelay
 	call bdelay
