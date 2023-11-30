@@ -11,7 +11,8 @@ data_from_acc:    ds 1    ; reserve one byte for a counter variable
     
     acc_reg_add equ 0x40	    ;ACC_CONF
     acc_reg_data equ 0x10
-psect	acc_code,class=CODE   	
+
+ psect	acc_code,class=CODE   	
 main:
     org 0x0
     goto start
@@ -19,6 +20,7 @@ main:
     org 0x100   
 start:
     call writeto_acc
+    call readfrom_acc
     goto 0x0
     
 writeto_acc: 
@@ -32,7 +34,7 @@ writeto_acc:
 readfrom_acc:
     movlw acc_reg_add		; Load accelerometer register address
     call spi_transmit_read      ; Write register address
-    movwf data_from_acc, A       ; Write register data to access ram
+    movwf PORTD, A       ; Write register data to access ram
     return 
 end main
 
