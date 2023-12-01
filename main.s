@@ -28,28 +28,26 @@ start:
     ;movwf TRISD,A
 
     call spi_setup
-    
-    call dummy_read 
+    call single_write 
+    ;call dummy_read 
     call instructto_acc
-   
     ;call readfrom_acc
     ;call hugedelay
     goto 0x00
     
-dummy_read: 
-    bsf PORTE, 0         ;Enable accelo ; cs pin connect to RE0.
+single_write:     ;single write to allow SPI (IMU data sheet P78)
+    bsf PORTE, 0
+    movlw 0x70
+    call spi_transmit_write   
     
-    movlw acc_dummy_add         ; Load accelerometer register address
-    call spi_transmit_write      ; Write register address to acc
-   
-    call spi_transmit_read      ; Write register data to acc
-    
+    movlw 00000001
+    call spi_transmit_write
     bcf PORTE, 0
-    ;call hugedelay
     return 
     
+    
 instructto_acc: 
-    bsf PORTE, 0        ;cs pin connect to RE0
+    bsf PORTE, 0        ;enable acce (cs pin connect to RE0)
     
     movlw acc_reg_add         ; Load accelerometer register address
     call spi_transmit_write      ; Write register address to acc
@@ -63,8 +61,7 @@ instructto_acc:
     
 readfrom_acc:
     
-    bsf PORTE, 0       
-    
+    bsf PORTE, 0   
                             ; Send dummy data to trigger the SPI communication
     call spi_transmit_read  ; Transmit dummy data
 
