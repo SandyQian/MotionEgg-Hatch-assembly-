@@ -31,7 +31,7 @@ start:
     call single_write 
     ;call dummy_read 
     call instructto_acc
-    ;call readfrom_acc
+    call readfrom_acc
     ;call hugedelay
     goto 0x00
     
