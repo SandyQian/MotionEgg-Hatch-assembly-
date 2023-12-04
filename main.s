@@ -26,8 +26,8 @@ main:
     
     org 0x100   
 start:
-    ;movlw 0xFF
-    ;movwf TRISD,A
+    movlw 0xFF
+    movwf TRISD,A
 
     call spi_setup
     ;call instructto_acc
@@ -53,7 +53,6 @@ instructto_acc:
     
     ;movlw acc_reg_add         ; Load accelerometer register address
     call spi_transmit_write      ; Write register address to acc
-    
     ;movlw acc_reg_data       ; Load accelerometer register data
     call spi_transmit_write      ; Write register data to acc
     
