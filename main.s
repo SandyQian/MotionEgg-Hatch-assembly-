@@ -10,10 +10,10 @@ psect	udata_acs   ; reserve data space in access ram
 data_from_acc:    ds 1    ; reserve one byte for a counter variable
     
     ;for data write
-    control_byte equ 01000000   ;write to & inv (0x40) => 0 1000000
+    control_byte equ 0b01000000   ;write to & 0x40 => 0 1000000
     ;for data read
-    control_byte2 equ 11000000   ;read from & inv (0x40) => 1 1000000
-    command       equ 00000001
+    control_byte2 equ 0b10000000   ;read from & 0x00 => 1 1000000
+    
 psect	code, abs ;class=CODE   	
 main:
     org 0x0
@@ -22,10 +22,10 @@ main:
     org 0x100   
 start:
     movlw 0xFF
-    movf W,TRISD,A
+    movwf TRISD,A
 
     call spi_setup
-    call instructto_acc
+    ;call instructto_acc
     call readfrom_acc
     movwf PORTD, A       ; Write register data to access ram
     ;call hugedelay
@@ -50,7 +50,7 @@ readfrom_acc:
     bcf PORTE, 0, A    ;enable acce (cs/RE0 pulled low by master)
                             
     movlw control_byte2
-    call spi_transmit_write 
+    call spi_transmit_write
     call spi_transmit_read
     
     ;movlw 0x00
