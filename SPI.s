@@ -22,14 +22,22 @@ spi_transmit_write:		         ; Start transmission of data (assumed data held in
     return
     
 spi_transmit_read: 
-    movwf SSP1BUF, A  
-    call wait_transmit
+    call wait_receive
+    ;call wait_receive
     movf SSP1BUF, W, A
     return
     
 wait_transmit:                               ; Wait for transmission to complete 
-    btfss PIR1, 3                           ; check interrupt flag to see if data has been sent completely
+    btfss PIR1, 3, A                           ; check interrupt flag to see if data has been sent completely
     bra wait_transmit
-    bcf PIR1, 3                             ; clear interrupt flag
+    bcf PIR1, 3, A                            ; clear interrupt flag
     return
+    
+wait_receive:
+    btfss SSP1STAT, 0, A
+    bra wait_receive
+    bcf SSP1STAT, 0, A
+    return
+    
+    
     

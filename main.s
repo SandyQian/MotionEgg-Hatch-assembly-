@@ -22,16 +22,17 @@ main:
     org 0x100   
 start:
     movlw 0xFF
-    movwf TRISD,A
+    movf W,TRISD,A
 
     call spi_setup
+    call instructto_acc
     call readfrom_acc
     movwf PORTD, A       ; Write register data to access ram
     ;call hugedelay
     goto 0x00
     
 instructto_acc: 
-    bcf PORTE, 0       ;enable acce (cs pin connect to RE0)
+    bcf PORTE, 0, A      ;enable acce (cs pin connect to RE0)
     
     movlw control_byte         ; Load accelerometer register address
     call spi_transmit_write      ; Write register address to acc
@@ -39,7 +40,7 @@ instructto_acc:
     movlw 0x10       ; Load accelerometer register data
     call spi_transmit_write      ; Write register data to acc
     
-    bsf PORTE, 0
+    bsf PORTE, 0, A
     ;call hugedelay
     return 
 
@@ -49,6 +50,7 @@ readfrom_acc:
     bcf PORTE, 0, A    ;enable acce (cs/RE0 pulled low by master)
                             
     movlw control_byte2
+    call spi_transmit_write 
     call spi_transmit_read
     
     ;movlw 0x00
