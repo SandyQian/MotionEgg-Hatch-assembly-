@@ -22,6 +22,7 @@ spi_transmit_write:		         ; Start transmission of data (assumed data held in
     return
     
 spi_transmit_read: 
+    clrf    SSP1BUF, A
     call wait_receive
     ;call wait_receive
     movf SSP1BUF, W, A
@@ -37,6 +38,7 @@ wait_receive:
     btfss SSP1STAT, 0, A
     bra wait_receive
     bcf SSP1STAT, 0, A
+    bcf PIR1, 3, A                            ; clear interrupt flag
     return
     
     

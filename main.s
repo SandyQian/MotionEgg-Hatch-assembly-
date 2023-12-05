@@ -21,8 +21,9 @@ main:
     
     org 0x100   
 start:
-    movlw 0xFF
-    movwf TRISD,A
+    movlw 0x00
+    movwf TRISD, A
+    bcf	  TRISE, 0
 
     call spi_setup
     ;call instructto_acc
@@ -52,6 +53,8 @@ readfrom_acc:
     movlw control_byte2
     call spi_transmit_write
     call spi_transmit_read
+    ;call spi_transmit_read
+    ;call spi_transmit_read
     
     ;movlw 0x00
     ;movwf SSP1BUF, A
