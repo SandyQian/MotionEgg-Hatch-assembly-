@@ -21,7 +21,8 @@ spi_transmit_write:		         ; Start transmission of data (assumed data held in
     call wait_transmit
     return
     
-spi_transmit_read:
+spi_transmit_read: 
+    movwf SSP1BUF, A  
     call wait_transmit
     movf SSP1BUF, W, A
     return
