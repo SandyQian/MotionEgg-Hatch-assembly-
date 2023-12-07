@@ -12,10 +12,10 @@ myArray:    ds 0x80 ; reserve 128 bytes for message data
 psect	data    
 	; ******* myTable, data in programme memory, and its length *****
 myTable:
-	db	'M'   ,'e','l','l','o',' ',0x0a,'W','o','r','l','d','!'
-		;'Y','i','t','o','n','g'
+	db	0x0A,0x0D,'M','e','l','l','o',' ','W','o','r','l','d','!'
+	db      0x0A,0x0D,'Y','i','t','o','n','g'
 					; message, plus carriage return
-	myTable_l   EQU	13	; length of data
+	myTable_l   EQU	22	; length of data
 	align	2
     
 psect	code, abs	
