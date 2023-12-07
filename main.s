@@ -8,7 +8,10 @@ extrn   delay, bdelay, bbdelay, hugedelay
     
 psect	udata_acs   ; reserve data space in access ram
 data_from_acc1:    ds 1    ; reserve one byte for a counter variable
-data_from_acc2:    ds 1    
+data_from_acc2:    ds 1   
+counter:    ds 1    ; reserve one byte for a counter variable
+delay_count:ds 1    ; reserve one byte for counter in the delay routine
+    
     ;for data write
     control_byte equ 0b01000000   ;write to & 0x40 => 0 1000000
     ;for data read
@@ -23,6 +26,9 @@ data_from_acc2:    ds 1
     
     milestone_step equ 0x02
     goal_step equ 0x05		;number of steps to complet game
+ 
+psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
+myArray:    ds 0x80 ; reserve 128 bytes for message data
       
 psect	code, abs ;class=CODE   	
 main:
