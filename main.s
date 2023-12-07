@@ -20,6 +20,8 @@ data_from_acc2:    ds 1
     step_conf2_r  equ 0b11111011   ;write to 0x7b
     step_cnt1	equ 0b11111000	 ;read from 0x78
     step_cnt2	equ 0b11111001	 ;read from 0x79
+    
+    milestone_step equ 0x02
     goal_step equ 0x05		;number of steps to complet game
       
 psect	code, abs ;class=CODE   	
@@ -42,11 +44,21 @@ start:
     call bbdelay   
     call reset_acc
     
-    call loop
-    ;call hugedelay
-    goto $
+    call loop1	;loop to reach milestone step
     
-loop: 
+    call loop2	;loop to reach goal step
+    
+    goto $
+ 
+loop1: 
+    call hugedelay
+    call readfrom_acc
+    movlw milestone_step
+    cpfsgt data_from_acc1, A
+    bra loop
+    return
+    
+loop2: 
     call hugedelay
     call readfrom_acc
     movlw goal_step
@@ -70,14 +82,8 @@ set_up_acc:              ;set up step counter to normal mode:
     movlw 0x03       ; Load accelerometer register data
     call spi_transmit_write      ; Write register data to acc
     
-    ;movlw 0x7E
-    ;call spi_transmit_write 
-    
-    ;movlw 0x2B
-    ;call spi_transmit_write 
-    
     bsf PORTE, 0, A
-    ;call hugedelay
+    
     return 
     
 reset_acc:
