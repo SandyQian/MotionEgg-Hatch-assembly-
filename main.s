@@ -40,22 +40,21 @@ start:
     
     call spi_setup
     call set_up_acc
-   
+
     call bbdelay   
     call reset_acc
     
     call loop1	;loop to reach milestone step
-    
     call loop2	;loop to reach goal step
     
-    goto $
+    goto 0x0
  
 loop1: 
     call hugedelay
     call readfrom_acc
     movlw milestone_step
     cpfsgt data_from_acc1, A
-    bra loop
+    bra loop1
     return
     
 loop2: 
@@ -63,7 +62,7 @@ loop2:
     call readfrom_acc
     movlw goal_step
     cpfsgt data_from_acc1, A
-    bra loop
+    bra loop2
     return
     
     
@@ -107,14 +106,14 @@ readfrom_acc:
     call spi_transmit_write      ; Select accelerometer register address
     call spi_transmit_read      ; Read register data
 		
-    movwf data_from_acc1, A   
+    movwf PORTH, A   
     bsf PORTE, 0, A
     
     bcf PORTE, 0, A
     movlw step_cnt2
     call spi_transmit_write      ; Select accelerometer register address
     call spi_transmit_read      ; Read register data
-    movwf data_from_acc2, A 
+    movwf PORTJ, A 
  
     bsf PORTE, 0, A      ;disable acce (cs/RE0 pulled high by master
     ;call hugedelay
