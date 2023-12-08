@@ -39,15 +39,16 @@ start:
     bcf	  TRISE, 0, A
     
     call spi_setup
-    call set_up_acc
+    ;call set_up_acc
 
-    call bbdelay   
-    call reset_acc
+    ;call bbdelay   
+    ;call reset_acc
+    call readfrom_acc
+    movwf PORTH, A
+    ;call loop1	;loop to reach milestone step
+    ;call loop2	;loop to reach goal step
     
-    call loop1	;loop to reach milestone step
-    call loop2	;loop to reach goal step
-    
-    goto 0x0
+    goto $
  
 loop1: 
     call hugedelay
@@ -102,18 +103,18 @@ readfrom_acc:
     
     bcf PORTE, 0, A    ;enable acce (cs/RE0 pulled low by master)
                            
-    movlw step_cnt1
+    movlw step_conf2_r
     call spi_transmit_write      ; Select accelerometer register address
     call spi_transmit_read      ; Read register data
-		
-    movwf PORTH, A   
-    bsf PORTE, 0, A
     
-    bcf PORTE, 0, A
-    movlw step_cnt2
-    call spi_transmit_write      ; Select accelerometer register address
-    call spi_transmit_read      ; Read register data
-    movwf PORTJ, A 
+       
+    ;bsf PORTE, 0, A
+    
+    ;bcf PORTE, 0, A
+    ;movlw step_conf2
+   ; call spi_transmit_write      ; Select accelerometer register address
+    ;call spi_transmit_read      ; Read register data
+    ;movwf PORTJ, A 
  
     bsf PORTE, 0, A      ;disable acce (cs/RE0 pulled high by master
     ;call hugedelay
