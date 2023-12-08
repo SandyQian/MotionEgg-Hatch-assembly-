@@ -29,6 +29,28 @@ delay_count:ds 1    ; reserve one byte for counter in the delay routine
  
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 myArray:    ds 0x80 ; reserve 128 bytes for message data
+
+
+psect	data    
+	; ******* myTable, data in programme memory, and its length *****
+myTable:
+	          ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','#','P','Q','R'
+	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;1
+	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ',' ',' ','#','#','#',' ',' ',' '    ;2
+	db	0x0A, 0x0D,' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' '    ;3
+	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;4  
+	db	0x0A, 0x0D,' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' '    ;5
+	db	0x0A, 0x0D,'#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#'    ;6
+	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;7
+	db	0x0A, 0x0D,' ',' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' '    ;8
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' '    ;9
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;10
+	;db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;11
+	;db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;12
+	;db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;13
+						
+	myTable_l   EQU	200	; length of data
+	align	2
       
 psect	code, abs ;class=CODE   	
 main:
@@ -43,36 +65,71 @@ start:
     movwf TRISJ, A
     
     bcf	  TRISE, 0, A
-    
+    call set_up_uart
+    call start_uart1
+    call uart_loop1
+		
     call spi_setup
     call set_up_acc
    
     call bbdelay   
     call reset_acc
     
-    call loop1	;loop to reach milestone step
-    
-    call loop2	;loop to reach goal step
+    call acc_loop1	;loop to reach milestone step
+		;call start_uart2 
+    ;call uart_loop2
+
+    call acc_loop2	;loop to reach goal step
+		;call start_uart3
+    ;call uart_loop3
     
     goto $
  
-loop1: 
+acc_loop1: 
     call hugedelay
     call readfrom_acc
     movlw milestone_step
     cpfsgt data_from_acc1, A
-    bra loop
+    bra acc_loop1
     return
     
-loop2: 
+acc_loop2: 
     call hugedelay
     call readfrom_acc
     movlw goal_step
     cpfsgt data_from_acc1, A
-    bra loop
+    bra acc_loop2
     return
-    
-    
+
+uart_loop1:   ;initial egg
+    tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+    movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
+    decfsz	counter, A		; count down to zero
+    bra	uart_loop1		; keep going until finished
+
+    movlw	myTable_l	; output message to UART
+    lfsr	2, myArray
+    call	UART_Transmit_Message
+    return
+	
+set_up_uart:
+    bcf	CFGS	; point to Flash program memory  
+    bsf	EEPGD 	; access Flash program memory
+    call	UART_Setup	; setup UART
+    return
+
+start_uart1: 	    ;load the initial egg
+    lfsr	0, myArray	; Load FSR0 with address in RAM	
+    movlw	low highword(myTable)	; address of data in PM
+    movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+    movlw	high(myTable)	; address of data in PM
+    movwf	TBLPTRH, A		; load high byte to TBLPTRH
+    movlw	low(myTable)	; address of data in PM
+    movwf	TBLPTRL, A		; load low byte to TBLPTRL
+    movlw	myTable_l	; bytes to read
+    movwf 	counter, A		; our counter register
+    return
+		  
 set_up_acc:              ;set up step counter to normal mode: 
     bcf PORTE, 0, A      ;enable acce (cs pin connect to RE0)
     
@@ -129,5 +186,3 @@ readfrom_acc:
     return 
     
 end main
-
-	
