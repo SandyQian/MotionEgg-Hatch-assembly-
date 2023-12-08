@@ -31,28 +31,34 @@ main:
 start:
     movlw 0x00
     movwf TRISH, A
+    
     movlw 0x00
     movwf TRISJ, A
     
-    bcf	  TRISE, 0
     
+    bcf	  TRISE, 0
 
     call spi_setup
+    
+   
+    ;call reset_acc
+    
+    
     call instructto_acc
    
     ;call bdelay
+   
+    ;movlw 0x80
+    movlw step_conf1_r
+    call readfrom_acc
+    movwf   PORTH, A       ; Write register data to access ram
+   
     movlw step_conf2_r
     call readfrom_acc
     movwf PORTJ, A       ; Write register data to access ram
-    
-    movlw step_conf1_r
-    call readfrom_acc
-    movwf PORTH, A       ; Write register data to access ram
-    
-   
-    
+
     ;call hugedelay
-    goto $
+    goto 0x0
     
 instructto_acc: 
     bcf PORTE, 0, A      ;enable acce (cs pin connect to RE0)
@@ -60,9 +66,12 @@ instructto_acc:
     movlw step_conf1         ; Load accelerometer register address
     call spi_transmit_write      ; Write register address to acc
     
-    movlw 0x1D       ; Load accelerometer register data
+    movlw 0x1d       ; Load accelerometer register data
     call spi_transmit_write      ; Write register data to acc
     
+    bsf PORTE, 0, A
+    
+    bcf PORTE, 0, A 
     movlw step_conf2         ; Load accelerometer register address
     call spi_transmit_write      ; Write register address to acc
     
@@ -99,7 +108,16 @@ readfrom_acc:
     ;movwf data_from_acc
     
     return 
+reset_acc:
+    bcf PORTE, 0, A        ;enable acce (cs pin connect to RE0)
     
+    movlw 0x7E         ; Load accelerometer register address
+    call spi_transmit_write      ; Write register address to acc
+    
+    movlw 0xB2     ; Load accelerometer register data
+    call spi_transmit_write      ; Write register data to acc
+    
+    bsf PORTE, 0, A
+    return     
 end main
 
-	
