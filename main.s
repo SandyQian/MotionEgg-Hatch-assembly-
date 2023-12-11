@@ -21,7 +21,7 @@ data_from_acc2:    ds 1
     step_cnt1	equ 0b11111000	 ;read from 0x78
     step_cnt2	equ 0b11111001	 ;read from 0x79
     
-    milestone_step equ 0x3f
+    milestone_step equ 0x80
     goal_step equ 0x05		;number of steps to complet game
       
 psect	code, abs ;class=CODE   	
@@ -42,7 +42,7 @@ start:
     
     call reset_acc
     
-    ;call set_up_acc
+    call set_up_acc
 
     ;call bbdelay   
     
@@ -53,21 +53,21 @@ start:
     
     goto 0x0
  
-loop1: 
-    ;call hugedelay
-    call readfrom_acc
-    movlw milestone_step
-    cpfsgt PORTH, A
-    bra loop1
-    return
+;loop1: 
+;    ;call bbdelay
+;    call readfrom_acc
+;    movlw milestone_step
+;    cpfsgt PORTH, A
+;    bra loop1
+;    return
     
-loop2: 
-    call hugedelay
-    call readfrom_acc
-    movlw goal_step
-    cpfsgt data_from_acc1, A
-    bra loop2
-    return
+;loop2: 
+;    call hugedelay
+;    call readfrom_acc
+;    movlw goal_step
+;    cpfsgt data_from_acc1, A
+;    bra loop2
+;    return
     
     
 set_up_acc:              ;set up step counter to normal mode: 
@@ -76,7 +76,7 @@ set_up_acc:              ;set up step counter to normal mode:
     movlw step_conf1         ; Load accelerometer register address
     call spi_transmit_write      ; Write register address to acc
     
-    movlw 0x15       ; Load accelerometer register data
+    movlw 0x2D       ; Load accelerometer register data
     call spi_transmit_write      ; Write register data to acc
     bsf PORTE, 0, A
     
@@ -84,7 +84,7 @@ set_up_acc:              ;set up step counter to normal mode:
     movlw step_conf2         ; Load accelerometer register address
     call spi_transmit_write      ; Write register address to acc
     
-    movlw 0x0B       ; Load accelerometer register data
+    movlw 0x08      ; Load accelerometer register data
     call spi_transmit_write      ; Write register data to acc
     
     bsf PORTE, 0, A
@@ -106,20 +106,22 @@ reset_acc:
 ;Code that write control byte and read data byte(s) from address 
 readfrom_acc:
     
-   ; bcf PORTE, 0, A    ;enable acce (cs/RE0 pulled low by master)
+    bcf PORTE, 0, A    ;enable acce (cs/RE0 pulled low by master)
                            
-   ; movlw step_cnt2
-    ;call spi_transmit_write      ; Select accelerometer register address
-    ;call spi_transmit_read      ; Read register data
-   ; movwf PORTH, A
+    ;movlw step_cnt2
+    movlw 0b10000011		   ; address for pmu
+    call spi_transmit_write      ; Select accelerometer register address
+    call spi_transmit_read      ; Read register data
+    movwf PORTH, A
        
-   ; bsf PORTE, 0, A
+    bsf PORTE, 0, A
     nop
     nop
     
     bcf PORTE, 0, A
-    movlw 0x80
-    call spi_transmit_write      ; Select accelerometer register address
+    ;movlw step_cnt1
+    movlw 0b10010010		; address for acc_x
+    call spi_transmit_write     ; Select accelerometer register address
     call spi_transmit_read      ; Read register data
     movwf PORTJ, A 
  
