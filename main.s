@@ -81,7 +81,7 @@ loop1:
     movlw milestone_step
     cpfsgt PORTH, A
     bra loop1
-    return
+    goto $
     
 loop2:    
     call readfrom_acc
