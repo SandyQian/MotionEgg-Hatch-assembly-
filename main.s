@@ -78,9 +78,8 @@ start:
  
 loop1: 
     call readfrom_acc
-    cpfsgt PORTH, A
     movlw milestone_step
-    
+    cpfsgt PORTH, A
     bra loop1
     goto $
     
