@@ -9,8 +9,8 @@ extrn   delay, bdelay, bbdelay, hugedelay
 psect	udata_acs   ; reserve data space in access ram
 data_from_acc_z0:    ds 1   
 data_from_acc_z1:    ds 1   
-test_data:		ds 1
-counter:		 ds 1		; reserve one byte for a counter variable
+counter:    ds 1    ; reserve one byte for a counter variable
+delay_count:ds 1    ; reserve one byte for counter in the delay routine
     
     ;for data write
     control_byte equ 0b01000000   ;write to & 0x40 => 0 1000000
@@ -38,12 +38,65 @@ counter:		 ds 1		; reserve one byte for a counter variable
     int_map2  equ  0x57
   
     milestone_step equ 0b00001000
-    goal_step equ 0x08		;number of steps to complet game
+    goal_step equ 0x10		;number of steps to complet game
  
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
-accz_data:		ds 2
+myArray:    ds 0x80 ; reserve 128 bytes for message data
+
+
+psect	data    
+	; ******* myTableEC, data in programme memory, and its length *****
+;cracked egg
+myTableR:                                                                                                           
+	           ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R'
+	;db  	0x0A, 0x0D,' ',' ',' ','S','T','A','R','T',' ',' ','','#','#',' ',' ',' ',' ',' '    ;1	   
+	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ','#','#','#',' ',' ',' ',' ',' '    ;1
+	db  	0x0A, 0x0D,' ',' ',' ','#',' ','#',' ',' ',' ',' ','#',' ','#',' ',' ',' ',' ',' '    ;2
+	db	0x0A, 0x0D,' ',' ','#','#',' ','#','#','#','#','#','#',' ','#','#',' ',' ',' ',' '    ;3
+	db	0x0A, 0x0D,' ',' ','#',' ','#',' ',' ',' ',' ',' ',' ','#',' ','#',' ',' ',' ',' '    ;4  
+	db	0x0A, 0x0D,' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' '    ;5
+	db	0x0A, 0x0D,' ',' ','#','#','#','#','#','#','#','#','#','#','#','#',' ',' ',' ',' '    ;6
+	db	0x0A, 0x0D,' ',' ',' ','#','#',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' ',' ',' '    ;7
+	db	0x0A, 0x0D,' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;8
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' '    ;9
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;10
+	
+myTableEC:                                                                                                           
+             ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','#','P','Q','R'
+	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;1
+	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ',' ',' ','#','#','#',' ',' ',' '    ;2
+	db	0x0A, 0x0D,' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' '    ;3
+	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;4  (crack peak)
+	db	0x0A, 0x0D,' ','#',' ','#',' ',' ',' ','#',' ',' ',' ','#',' ',' ',' ','#','#',' '    ;5
+	db	0x0A, 0x0D,'#','#',' ',' ','#',' ','#',' ','#',' ','#',' ','#',' ','#',' ','#','#'    ;6  
+	db	0x0A, 0x0D,' ','#','#',' ',' ','#',' ',' ',' ','#',' ',' ',' ','#',' ','#','#',' '    ;7  (crack bottom)
+	db	0x0A, 0x0D,' ',' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' '    ;8
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' '    ;9
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;10
+myTableE:                                                                                                          ;ps: ctrl+shift+c = comment multiple lines 
+                  ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','#','P','Q','R'
+	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;1
+	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ',' ',' ','#','#','#',' ',' ',' '    ;2
+	db	0x0A, 0x0D,' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' '    ;3
+	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;4  
+	db	0x0A, 0x0D,' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' '    ;5
+	db	0x0A, 0x0D,'#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#'    ;6
+	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;7
+	db	0x0A, 0x0D,' ',' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' '    ;8
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' '    ;9
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;10
+	
+		
+	myTable_l   EQU	200	; length of data
+	align	2
+	
+EscTbl: 
+	db	0x1b,'[','2','J' 
+	EscTbl_l    EQU  4
+	align	2
       
 psect	code, abs ;class=CODE   	
+
 main:
     org 0x0
     goto start
@@ -62,31 +115,35 @@ start:
     bcf	  TRISE, 0, A
 	
     call spi_setup	;set up SPI tranmission
-    
+    call set_up_uart
+    call start_uart0
+    call uart_loop
     call set_up_acc	;manage configuration of accelerometer
-    call step_enable
+    ;call step_enable
     call reset_step	;reset step  
    
     call loop1	;loop to reach milestone step
-    ;call loop2	;loop to reach goal step
-    
+    call start_uart1
+    call uart_loop
+    call loop2	;loop to reach goal step
+    call start_uart2
+    call uart_loop
     ;movlw 0b10000000
     ;call readfrom_acc
-    movlw 0x08
-    movwf PORTH, A
+    ;call loop2
     goto $
  
 loop1: 
     call readfrom_acc
     movlw milestone_step
-    cpfsgt PORTH, A
+    cpfsgt LATH, A
     bra loop1
-    goto $
+    return
     
 loop2:    
     call readfrom_acc
     movlw goal_step
-    cpfsgt PORTJ, A
+    cpfsgt LATH, A
     bra loop2
     return
     
@@ -181,19 +238,7 @@ set_up_acc:
 ; 
     return
 
-step_enable:
-    bcf PORTE, 0, A       
-    
-    movlw cmd         ; Load accelerometer register address
-    call spi_transmit_write      ; Write register address to acc
-    
-    movlw 0xB1     ; Load accelerometer register data
-    call spi_transmit_write      ; Write register data to acc
-    
-    bsf PORTE, 0, A
-    return 
- 
-;Instruction to reset step counter
+
 reset_step:
     bcf PORTE, 0, A       
     
@@ -209,62 +254,78 @@ reset_step:
 ;Code that write control byte and read data byte(s) from address 
 readfrom_acc:
     
-    bcf PORTE, 0, A   
-                           
-    movlw step_cnt1                      ;address for step count
-    ;movlw 0b11000000                ;add for acc conf
-    ;movlw step_conf1_r                     ;address for step conf2(read)
-    ;movlw 0b10010010
-    ;movlw  0b10000011	 ; address for pmu (0X03, read)
-    ;movlw 0b11010010	; address int_en
-    ;movlw acc_z_1         
+    bcf PORTE, 0, A                      
+    movlw step_cnt1                      ;address for step count  
     ;movlw chip_id
-    ;movlw 0b11010010
     call spi_transmit_write     
     call spi_transmit_read      ; Read register data
     movwf PORTH, A
     ;movwf data_from_acc_z0, A
-    
     bsf PORTE, 0, A
     nop
     nop
     
-    bcf PORTE, 0, A
-   ;movlw step_cnt1
-   ;movlw 0b10010011		; address for acc_x (0x13,  read, MSB)
-    movlw acc_y_1
-    ;movlw 0b10000000
-    call spi_transmit_write     ; Select accelerometer register address
+    bcf PORTE, 0, A                       
+    movlw acc_y_1         
+    call spi_transmit_write     
     call spi_transmit_read      ; Read register data
-    movwf PORTJ, A 
+    movwf PORTJ, A
     bsf PORTE, 0, A
-    nop
-    nop
-    ;call bdelay
-    ;movwf data_from_acc
-    ;call hugedelay
     return 
+
+set_up_uart:
+		bcf	CFGS	; point to Flash program memory  
+		bsf	EEPGD 	; access Flash program memory
+		call	UART_Setup	; setup UART
+		return
+
+		start_uart0: 	    ;load the initial egg
+		lfsr	0, myArray	; Load FSR0 with address in RAM	
+		movlw	low highword(myTableE)	; address of data in PM
+		movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+		movlw	high(myTableE)	; address of data in PM
+		movwf	TBLPTRH, A		; load high byte to TBLPTRH
+		movlw	low(myTableE)	; address of data in PM
+		movwf	TBLPTRL, A		; load low byte to TBLPTRL
+		movlw	myTable_l	; bytes to read
+		movwf 	counter, A		; our counter register
+		return
+start_uart1: 	    ;load the initial egg
+		lfsr	0, myArray	; Load FSR0 with address in RAM	
+		movlw	low highword(myTableEC)	; address of data in PM
+		movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+		movlw	high(myTableEC)	; address of data in PM
+		movwf	TBLPTRH, A		; load high byte to TBLPTRH
+		movlw	low(myTableEC)	; address of data in PM
+		movwf	TBLPTRL, A		; load low byte to TBLPTRL
+		movlw	myTable_l	; bytes to read
+		movwf 	counter, A		; our counter register
+		return    
+start_uart2: 	    ;load the initial egg
+		lfsr	0, myArray	; Load FSR0 with address in RAM	
+		movlw	low highword(myTableR)	; address of data in PM
+		movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+		movlw	high(myTableR)	; address of data in PM
+		movwf	TBLPTRH, A		; load high byte to TBLPTRH
+		movlw	low(myTableR)	; address of data in PM
+		movwf	TBLPTRL, A		; load low byte to TBLPTRL
+		movlw	myTable_l	; bytes to read
+		movwf 	counter, A		; our counter register
+		return
+
+
+
+uart_loop:   ;initial egg
+		tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+		movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
+		decfsz	counter, A		; count down to zero
+		bra	uart_loop		; keep going until finished
+			
+		movlw	myTable_l	; output message to UART
+		lfsr	2, myArray
+		call	UART_Transmit_Message
+		return
+		
+
     
-;combine_bit:
-;    
-;    accz_l   EQU	2
-;    
-;    lfsr	0, accz_data	; Load FSR0 with address in RAM	
-;    movff  PORTH, TBLPTRH, A	;load high byte to TBLPTRH
-;    movff  PORTJ, TBLPTRL, A	;load low byte to TBLPTRL
-;    movlw	accz_l	; bytes to read
-;    movwf 	counter, A		; our counter register
-;    
-;loop: 
-;    tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
-;    movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
-;    decfsz	counter, A		; count down to zero
-;    bra	loop		; keep going until finished
-;
-;    movlw	accz_l	; output message to UART
-;    lfsr	2, accz_data
-;    call	UART_Transmit_Message
-;
-;   return
-;    
 end main
