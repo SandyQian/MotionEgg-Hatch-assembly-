@@ -37,7 +37,7 @@ counter:		 ds 1		; reserve one byte for a counter variable
     int_out_ctrl  equ 0x53	;write to 0x53
     int_map2  equ  0x57
   
-    milestone_step equ 0x02
+    milestone_step equ 0x08
     goal_step equ 0x08		;number of steps to complet game
  
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
@@ -72,20 +72,21 @@ start:
     
     ;movlw 0b10000000
     ;call readfrom_acc
+    movlw 0x08
+    movwf PORTH, A
     goto $
  
 loop1: 
-    
     call readfrom_acc
     movlw milestone_step
-    cpfseq PORTH, A
+    cpfsgt PORTH, A
     bra loop1
     return
     
 loop2:    
     call readfrom_acc
     movlw goal_step
-    cpfsgt PORTH, A
+    cpfsgt PORTJ, A
     bra loop2
     return
     
@@ -222,7 +223,8 @@ readfrom_acc:
     call spi_transmit_write     
     call spi_transmit_read      ; Read register data
     movwf PORTH, A
-       
+    ;movwf data_from_acc_z0, A
+    
     bsf PORTE, 0, A
     nop
     nop
