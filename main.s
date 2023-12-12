@@ -33,8 +33,8 @@ counter:		 ds 1		; reserve one byte for a counter variable
     step_cnt1	equ 0b11111000	 ;read from 0x78
     step_cnt0	equ 0b11111001	 ;read from 0x79
     
-    milestone_step equ 0x80
-    goal_step equ 0x05		;number of steps to complet game
+    milestone_step equ 0x08
+    goal_step equ 0x10		;number of steps to complet game
  
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 accz_data:		ds 2
@@ -67,28 +67,28 @@ start:
     
     ;call readfrom_acc
     ;call combine_bit
-    call loop1
+    ;call loop1
     ;movwf PORTH, A
-    ;call loop1	;loop to reach milestone step
-    ;call loop2	;loop to reach goal step
+    call loop1	;loop to reach milestone step
+    call loop2	;loop to reach goal step
     
     goto $
  
 loop1: 
     ;call bbdelay
     call readfrom_acc
-    movlw milestone_step
-    cpfsgt PORTH, A
+    movlw milestone_step     ;skip if milesto
+    cpfsgt LATH, A
     bra loop1
     return
     
-;loop2: 
-;    call hugedelay
-;    call readfrom_acc
-;    movlw goal_step
-;    cpfsgt data_from_acc1, A
-;    bra loop2
-;    return
+loop2: 
+    ;call hugedelay
+    call readfrom_acc
+    movlw goal_step
+    cpfsgt LATH, A
+    bra loop2
+    return
     
  ;set up step counter to normal mode:     
 set_up_acc:             
