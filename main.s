@@ -18,6 +18,7 @@ counter:		 ds 1		; reserve one byte for a counter variable
     control_byte2 equ 0b10000000   ;read from & 0x78 => 1 1000000
  
     cmd		equ 0x7E	 ;address for cmd (cmd, write)
+    chip_id	equ 0b10000000   ;address for chip_id (chip_id, read)
     acc_x_0	equ 0b10010010   ;address for acc_x (0x12, read, LSB)
     acc_x_1	equ 0b10010011   ;address for acc_x (0x13, read, MSB)
     acc_y_0	equ 0b10010100   ;address for acc_y (0x14, read, MSB)
@@ -32,9 +33,12 @@ counter:		 ds 1		; reserve one byte for a counter variable
     step_conf1_r	equ 0b11111011   ;write to 0x7b
     step_cnt1	equ 0b11111000	 ;read from 0x78
     step_cnt0	equ 0b11111001	 ;read from 0x79
-    
+    int_en2	equ 0x52	;write to 0x52
+    int_out_ctrl  equ 0x53	;write to 0x53
+    int_map2  equ  0x57
+  
     milestone_step equ 0x80
-    goal_step equ 0x05		;number of steps to complet game
+    goal_step equ 0x08		;number of steps to complet game
  
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 accz_data:		ds 2
@@ -58,35 +62,30 @@ start:
     bcf	  TRISE, 0, A
 	
     call spi_setup	;set up SPI tranmission
+    
     call set_up_acc	;manage configuration of accelerometer
     call step_enable
-    call reset_step	;reset step
-    ;call bbdelay   
-    
-    
-    
-    ;call readfrom_acc
-    ;call combine_bit
-    call loop1
-    ;movwf PORTH, A
-    ;call loop1	;loop to reach milestone step
+    call reset_step	;reset step  
+   
+    call loop1	;loop to reach milestone step
     ;call loop2	;loop to reach goal step
     
+;    call reset_step
+;    call readfrom_acc
     goto $
  
 loop1: 
-    ;call bbdelay
+    
     call readfrom_acc
     movlw milestone_step
     cpfsgt PORTH, A
     bra loop1
     return
     
-;loop2: 
-;    call hugedelay
+;loop2:    
 ;    call readfrom_acc
 ;    movlw goal_step
-;    cpfsgt data_from_acc1, A
+;    cpfsgt PORTH, A
 ;    bra loop2
 ;    return
     
@@ -120,7 +119,7 @@ set_up_acc:
     call spi_transmit_write     
     bsf PORTE, 0, A
     
- ;Power mode : Suspend -> Normal mode (gyro)  
+    ;Power mode : Suspend -> Normal mode (gyro)  
     bcf PORTE, 0, A  
     movlw cmd      ;Address fo command reg (cmd) 
     call spi_transmit_write     
@@ -138,33 +137,43 @@ set_up_acc:
     call spi_transmit_write     
     bsf PORTE, 0, A
     
+    ;reset inerrupt pin
+    bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
+    movlw cmd
+    ;movlw 0x57         ; Load accelerometer register address
+    call spi_transmit_write      ; Write register address to acc
+
+    movlw 0xB1
+    ;movlw 0b00000001      ; Load accelerometer register data
+    call spi_transmit_write      ; Write register data to acc
+    bsf PORTE, 0, A	; disable acc (cs pin connect to RE0)
+
     ;enable step detector
     bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
     
-    movlw 0x52         ; Load accelerometer register address
+    movlw int_en2         ; Load accelerometer register address
     call spi_transmit_write      ; Write register address to acc
     
     movlw 0b00001000       ; Load accelerometer register data
     call spi_transmit_write      ; Write register data to acc
     bsf PORTE, 0, A	; disable acc (cs pin connect to RE0)	
-;    
-;;    ;enable inerrupt pin
+   
+   ;enable inerrupt pin2
     bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
     
-    movlw 0x53         ; Load accelerometer register address
+    movlw int_out_ctrl         ; Load accelerometer register address
     call spi_transmit_write      ; Write register address to acc
     
     movlw 0b10000000       ; Load accelerometer register data
     call spi_transmit_write      ; Write register data to acc
     bsf PORTE, 0, A	; disable acc (cs pin connect to RE0)
 ;;    
-;     ;map inerrupt pin
+    ;map step detector to interrupt pin2
     bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
-    ;movlw 0x7E
-    movlw 0x57         ; Load accelerometer register address
+   
+    movlw int_map2        ; Load accelerometer register address
     call spi_transmit_write      ; Write register address to acc
 
-    ;movlw 0xB1
     movlw 0b00000001      ; Load accelerometer register data
     call spi_transmit_write      ; Write register data to acc
     bsf PORTE, 0, A	; disable acc (cs pin connect to RE0)
@@ -201,16 +210,14 @@ readfrom_acc:
     
     bcf PORTE, 0, A   
                            
-    movlw step_cnt1                      ;address for step count
+    ;movlw step_cnt1                      ;address for step count
     ;movlw 0b11000000                ;add for acc conf
     ;movlw step_conf1_r                     ;address for step conf2(read)
     ;movlw 0b10010010
     ;movlw  0b10000011	 ; address for pmu (0X03, read)
     ;movlw 0b11010010	; address int_en
-    ;movlw   0b10010011		; address for acc_x (0x13, read, MSB)
     ;movlw acc_z_1         
-   ;movlw 0b10010101		;address for acc_y (0x15, read, MSB)
-    ;movlw 0b10000000
+    movlw chip_id
     ;movlw 0b11010010
     call spi_transmit_write     
     call spi_transmit_read      ; Read register data
@@ -231,7 +238,7 @@ readfrom_acc:
     bsf PORTE, 0, A
     nop
     nop
-    call bbdelay
+    ;call bdelay
     ;movwf data_from_acc
     ;call hugedelay
     return 
