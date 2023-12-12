@@ -23,8 +23,8 @@ delay_count:ds 1    ; reserve one byte for counter in the delay routine
     acc_x_1	equ 0b10010011   ;address for acc_x (0x13, read, MSB)
     acc_y_0	equ 0b10010100   ;address for acc_y (0x14, read, MSB)
     acc_y_1	equ 0b10010101   ;address for acc_y (0x15, read, MSB)
-    acc_z_0		equ 0b10010110   ;address for acc_z (0x16, read, LSB)
-    acc_z_1		equ 0b10010111   ;address for acc_z (0x17, read, MSB)
+    acc_z_0	equ 0b10010110   ;address for acc_z (0x16, read, LSB)
+    acc_z_1	equ 0b10010111   ;address for acc_z (0x17, read, MSB)
   
     
     step_conf0	equ 0b01111010   ;write to 0x7a
@@ -49,7 +49,6 @@ psect	data
 ;cracked egg
 myTableR:                                                                                                           
 	           ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R'   
-	db  	0x0A, 0x0D,' ',' ','G','A','M','E',' ','F','I','N','I','S','H','!',' ',' ',' ',' '   ;0
 	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ','#','#','#',' ',' ',' ',' ',' '    ;1
 	db  	0x0A, 0x0D,' ',' ',' ','#',' ','#',' ',' ',' ',' ','#',' ','#',' ',' ',' ',' ',' '    ;2
 	db	0x0A, 0x0D,' ',' ','#','#',' ','#','#','#','#','#','#',' ','#','#',' ',' ',' ',' '    ;3
@@ -59,11 +58,10 @@ myTableR:
 	db	0x0A, 0x0D,' ',' ',' ','#','#',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' ',' ',' '    ;7
 	db	0x0A, 0x0D,' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;8
 	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' '    ;9
-	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;10
+	db  	0x0A, 0x0D,' ',' ','G','A','M','E',' ','F','I','N','I','S','H','!',' ',' ',' ',' '   ;10
 	
 myTableEC:                                                                                                           
              ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','#','P','Q','R'
-	db 	0x0A, 0x0D,' ',' ','A','L','M','O','S','T',' ','T','H','E','R','E','!',' ',' ',' '    ;0
 	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;1
 	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ',' ',' ','#','#','#',' ',' ',' '    ;2
 	db	0x0A, 0x0D,' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' '    ;3
@@ -73,10 +71,9 @@ myTableEC:
 	db	0x0A, 0x0D,' ','#','#',' ',' ','#',' ',' ',' ','#',' ',' ',' ','#',' ','#','#',' '    ;7  (crack bottom)
 	db	0x0A, 0x0D,' ',' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' '    ;8
 	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' '    ;9
-	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;10
+	db 	0x0A, 0x0D,' ',' ','A','L','M','O','S','T',' ','T','H','E','R','E','!',' ',' ',' '    ;10
 myTableE:                                                                                                          ;ps: ctrl+shift+c = comment multiple lines 
-                  ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','#','P','Q','R'
-	db  	0x0A, 0x0D,' ',' ',' ','G','A','M','E',' ',' ','S','T','A','R','T','!',' ',' ',' '    ;0	
+                  ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','#','P','Q','R'	
 	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;1
 	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ',' ',' ','#','#','#',' ',' ',' '    ;2
 	db	0x0A, 0x0D,' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' '    ;3
@@ -86,7 +83,7 @@ myTableE:                                                                       
 	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;7
 	db	0x0A, 0x0D,' ',' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' '    ;8
 	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' '    ;9
-	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;10
+	db  	0x0A, 0x0D,' ',' ',' ','G','A','M','E',' ',' ','S','T','A','R','T','!',' ',' ',' '    ;10
 	
 		
 	myTable_l   EQU	200	; length of data
@@ -315,8 +312,6 @@ start_uart2: 	    ;load the initial egg
 		movwf 	counter, A		; our counter register
 		return
 
-
-
 uart_loop:   ;initial egg
 		tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 		movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
@@ -327,6 +322,24 @@ uart_loop:   ;initial egg
 		lfsr	2, myArray
 		call	UART_Transmit_Message
 		return
+
+Esc:	lfsr	0,  EscArray	; Load FSR0 with address in RAM	
+	movlw	low highword(EscTbl)	; address of data in PM
+	movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+	movlw	high(EscTbl)	; address of data in PM
+	movwf	TBLPTRH, A		; load high byte to TBLPTRH
+	movlw	low(EscTbl)	; address of data in PM
+	movwf	TBLPTRL, A		; load low byte to TBLPTRL
+	movlw	EscTbl_l	; bytes to read
+	movwf 	counter, A		; our counter register
+Escloop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
+	decfsz	counter, A		; count down to zero
+	bra	Escloop		; keep going until finished
+	
+	movlw	EscTbl_l	; output message to UART
+	lfsr	2, EscArray
+	call	UART_Transmit_Message
 		
 
     
