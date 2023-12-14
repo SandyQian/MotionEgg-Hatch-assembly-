@@ -18,6 +18,7 @@ random:	    ds 1
     ;for data read
     control_byte2 equ 0b10000000   ;read from & 0x78 => 1 1000000
  
+    sensor_time	equ 0b10011010	 ;address for sensor time (0x18, read, LSB)
     cmd		equ 0x7E	 ;address for cmd (cmd, write)
     chip_id	equ 0b10000000   ;address for chip_id (chip_id, read)
     acc_x_0	equ 0b10010010   ;address for acc_x (0x12, read, LSB)
@@ -27,7 +28,6 @@ random:	    ds 1
     acc_z_0	equ 0b10010110   ;address for acc_z (0x16, read, LSB)
     acc_z_1	equ 0b10010111   ;address for acc_z (0x17, read, MSB)
   
-    
     step_conf0	equ 0b01111010   ;write to 0x7a
     step_conf1	equ 0b01111011   ;write to 0x7b
     step_conf0_r	equ 0b11111010   ;write to 0x7a
@@ -91,7 +91,7 @@ myTableEC:
 	db 	0x0A, 0x0D,' ',' ','A','L','M','O','S','T',' ','T','H','E','R','E','!',' ',' ',' '    ;10
 
 ;rabbit
-myTableR:                                                                                                           
+myTablek:                                                                                                           
 	           ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R'   
 	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ','#','#','#',' ',' ',' ',' ',' '    ;1
 	db  	0x0A, 0x0D,' ',' ',' ','#',' ','#',' ',' ',' ',' ','#',' ','#',' ',' ',' ',' ',' '    ;2
@@ -107,6 +107,21 @@ myTableR:
 
 	myTable_l   EQU	200	; length of data
 	align	2
+
+;penguin
+myTableR:                                                                                                           
+			  ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R'   
+	db  	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' '    ;1
+	db  	0x0A, 0x0D,' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' '    ;2
+	db	0x0A, 0x0D,' ',' ',' ','#',' ',' ','#',' ','#','#',' ','#',' ','#',' ',' ',' ',' '    ;3
+	db	0x0A, 0x0D,' ',' ',' ','#',' ',' ',' ','#',' ',' ','#',' ',' ','#',' ',' ',' ',' '    ;4  
+	db	0x0A, 0x0D,' ',' ',' ','#',' ',' ',' ','#','-','-','#',' ',' ','#','#',' ',' ',' '    ;5
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' ','#',' ',' ',' ',' '    ;6
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' '    ;7
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ','#',' ',' ','#',' ',' ',' ',' ',' ',' ',' '    ;8
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#','#',' ',' ','#','#',' ',' ',' ',' ',' ',' '    ;9
+	db  	0x0A, 0x0D,' ',' ','G','A','M','E',' ','F','I','N','I','S','H','!',' ',' ',' ',' '   ;10
+
 	
 EscTbl: 
 	db	0x0A, 0x0D, 0x1b,'[','2','J' 
@@ -129,6 +144,10 @@ start:
     movwf TRISJ, A
     movlw 0x02
     movwf PORTJ, A
+    movlw 0x00
+    movwf TRISD, A
+    movlw 0x02
+    movwf PORTD, A
     
     bcf	  TRISE, 0, A
 	
@@ -157,7 +176,7 @@ start:
     call set_up_acc	;manage configuration of accelerometer
     call reset_step	;reset step
     
-    
+    call readfrom_acc
     call loop1	;loop to reach milestone step
     
     call uart_Esc       ;clear screen
@@ -283,7 +302,7 @@ set_up_acc:
     call spi_transmit_write     
     bsf PORTE, 0, A
     
-;reset inerrupt pin
+;reset interrupt pin
     bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
     movlw cmd
     ;movlw 0x57         ; Load accelerometer register address
@@ -350,17 +369,23 @@ readfrom_acc:
     movwf PORTH, A
     ;movwf data_from_acc_z0, A
     bsf PORTE, 0, A
-    nop
-    nop
     
     bcf PORTE, 0, A                       
-    movlw acc_y_1         
+    movlw acc_y_1          
     call spi_transmit_write     
     call spi_transmit_read      ; Read register data
     movwf PORTJ, A
     bsf PORTE, 0, A
-    return 
-
+    
+    bcf PORTE, 0, A                       
+    movlw acc_x_0         
+    call spi_transmit_write     
+    call spi_transmit_read      ; Read register data
+    movwf PORTD, A
+    bsf PORTE, 0, A
+    return
+   
+    
 set_up_uart:
     bcf	CFGS	; point to Flash program memory  
     bsf	EEPGD 	; access Flash program memory
