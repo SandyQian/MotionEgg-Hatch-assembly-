@@ -42,11 +42,40 @@ delay_count:ds 1    ; reserve one byte for counter in the delay routine
  
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 myArray:    ds 0x80 ; reserve 128 bytes for message data
-
+EscArray:   ds 0x03
 
 psect	data    
 	; ******* myTableEC, data in programme memory, and its length *****
+	
+;egg
+myTableE:                                                                                                          ;ps: ctrl+shift+c = comment multiple lines 
+                  ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','#','P','Q','R'	
+	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;1
+	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ',' ',' ','#','#','#',' ',' ',' '    ;2
+	db	0x0A, 0x0D,' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' '    ;3
+	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;4  
+	db	0x0A, 0x0D,' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' '    ;5
+	db	0x0A, 0x0D,'#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#'    ;6
+	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;7
+	db	0x0A, 0x0D,' ',' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' '    ;8
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' '    ;9
+	db  	0x0A, 0x0D,' ',' ',' ','G','A','M','E',' ',' ','S','T','A','R','T','!',' ',' ',' '    ;10
+
 ;cracked egg
+myTableEC:                                                                                                           
+             ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','#','P','Q','R'
+	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;1
+	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ',' ',' ','#','#','#',' ',' ',' '    ;2
+	db	0x0A, 0x0D,' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' '    ;3
+	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;4  (crack peak)
+	db	0x0A, 0x0D,' ','#',' ','#',' ',' ',' ','#',' ',' ',' ','#',' ',' ',' ','#','#',' '    ;5
+	db	0x0A, 0x0D,'#','#',' ',' ','#',' ','#',' ','#',' ','#',' ','#',' ','#',' ','#','#'    ;6  
+	db	0x0A, 0x0D,' ','#','#',' ',' ','#',' ',' ',' ','#',' ',' ',' ','#',' ','#','#',' '    ;7  (crack bottom)
+	db	0x0A, 0x0D,' ',' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' '    ;8
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' '    ;9
+	db 	0x0A, 0x0D,' ',' ','A','L','M','O','S','T',' ','T','H','E','R','E','!',' ',' ',' '    ;10
+
+;rabbit
 myTableR:                                                                                                           
 	           ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R'   
 	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ','#','#','#',' ',' ',' ',' ',' '    ;1
@@ -60,38 +89,13 @@ myTableR:
 	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' '    ;9
 	db  	0x0A, 0x0D,' ',' ','G','A','M','E',' ','F','I','N','I','S','H','!',' ',' ',' ',' '   ;10
 	
-myTableEC:                                                                                                           
-             ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','#','P','Q','R'
-	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;1
-	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ',' ',' ','#','#','#',' ',' ',' '    ;2
-	db	0x0A, 0x0D,' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' '    ;3
-	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;4  (crack peak)
-	db	0x0A, 0x0D,' ','#',' ','#',' ',' ',' ','#',' ',' ',' ','#',' ',' ',' ','#','#',' '    ;5
-	db	0x0A, 0x0D,'#','#',' ',' ','#',' ','#',' ','#',' ','#',' ','#',' ','#',' ','#','#'    ;6  
-	db	0x0A, 0x0D,' ','#','#',' ',' ','#',' ',' ',' ','#',' ',' ',' ','#',' ','#','#',' '    ;7  (crack bottom)
-	db	0x0A, 0x0D,' ',' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' '    ;8
-	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' '    ;9
-	db 	0x0A, 0x0D,' ',' ','A','L','M','O','S','T',' ','T','H','E','R','E','!',' ',' ',' '    ;10
-myTableE:                                                                                                          ;ps: ctrl+shift+c = comment multiple lines 
-                  ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','#','P','Q','R'	
-	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;1
-	db  	0x0A, 0x0D,' ',' ',' ','#','#','#',' ',' ',' ',' ',' ',' ','#','#','#',' ',' ',' '    ;2
-	db	0x0A, 0x0D,' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' '    ;3
-	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;4  
-	db	0x0A, 0x0D,' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' '    ;5
-	db	0x0A, 0x0D,'#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#'    ;6
-	db	0x0A, 0x0D,' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' '    ;7
-	db	0x0A, 0x0D,' ',' ',' ','#','#',' ',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' '    ;8
-	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#',' ',' ',' ',' ',' '    ;9
-	db  	0x0A, 0x0D,' ',' ',' ','G','A','M','E',' ',' ','S','T','A','R','T','!',' ',' ',' '    ;10
-	
-		
+
 	myTable_l   EQU	200	; length of data
 	align	2
 	
 EscTbl: 
-	db	0x1b,'[','2','J' 
-	EscTbl_l    EQU  4
+	db	0x0A, 0x0D, 0x1b,'[','2','J' 
+	EscTbl_l    EQU  6
 	align	2
       
 psect	code, abs ;class=CODE   	
@@ -115,17 +119,25 @@ start:
 	
     call spi_setup	;set up SPI tranmission
     call set_up_uart
-    call start_uart0
-    call uart_loop
+    
+    call uart_Esc       ;clear screen
+    call start_uart0	;1st UART image 
+    call uart_loop	
+    
     call set_up_acc	;manage configuration of accelerometer
     ;call step_enable
     call reset_step	;reset step  
    
     call loop1	;loop to reach milestone step
-    call start_uart1
-    call uart_loop
+    
+    call uart_Esc       ;clear screen
+    call start_uart1	;2nd UART image
+    call uart_loop	
+    
     call loop2	;loop to reach goal step
-    call start_uart2
+    
+    call uart_Esc	 ;clear screen
+    call start_uart2	 ;3rd UART image
     call uart_loop
     ;movlw 0b10000000
     ;call readfrom_acc
@@ -323,16 +335,15 @@ uart_loop:   ;initial egg
 		call	UART_Transmit_Message
 		return
 
-Esc:	lfsr	0,  EscArray	; Load FSR0 with address in RAM	
-	movlw	low highword(EscTbl)	; address of data in PM
-	movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+uart_Esc:	lfsr	0,  EscArray	; Load FSR0 with address in RAM	
 	movlw	high(EscTbl)	; address of data in PM
 	movwf	TBLPTRH, A		; load high byte to TBLPTRH
 	movlw	low(EscTbl)	; address of data in PM
 	movwf	TBLPTRL, A		; load low byte to TBLPTRL
 	movlw	EscTbl_l	; bytes to read
 	movwf 	counter, A		; our counter register
-Escloop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+Escloop: 	
+	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
 	decfsz	counter, A		; count down to zero
 	bra	Escloop		; keep going until finished
@@ -340,6 +351,7 @@ Escloop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	movlw	EscTbl_l	; output message to UART
 	lfsr	2, EscArray
 	call	UART_Transmit_Message
+	return 
 		
 
     
