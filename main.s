@@ -37,8 +37,8 @@ delay_count:ds 1    ; reserve one byte for counter in the delay routine
     int_out_ctrl  equ 0x53	;write to 0x53
     int_map2  equ  0x57
   
-    milestone_step equ 0b00001000
-    goal_step equ 0x10		;number of steps to complet game
+    milestone_step equ 0x0F     ;15 high-knees to make crack on egg
+    goal_step equ 0x1E		;30 high-knees to hatch the egg
  
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 myArray:    ds 0x80 ; reserve 128 bytes for message data
@@ -49,13 +49,13 @@ psect	data
 
 myTableI:                                                                                                          ;ps: ctrl+shift+c = comment multiple lines 
                           ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R'	
-	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;1
+	db  	0x0A, 0x0D,' ','M','O','T','I','O','N',' ','E','G','G','H','A','T','C','H',' ',' '    ;1
 	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;2
-	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;3
+	db	0x0A, 0x0D,' ',' ',' ',' ','G','A','M','E',' ','R','U','L','E',' ',' ',' ',' ',' '    ;3
 	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;4  
-	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;5
-	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;6
-	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;7
+	db	0x0A, 0x0D,' ',' ','C','l','e','a','r',' ','3','0',' ','h','i','g','h',' ',' ',' '    ;5
+	db	0x0A, 0x0D,' ',' ','k','n','e','e','s',' ','t','o',' ','h','a','t','c','h',' ',' '    ;6
+	db	0x0A, 0x0D,' ',' ','a','n',' ','e','g','g','!',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;7
 	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;8
 	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;9
 	db  	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;10
@@ -133,31 +133,42 @@ start:
 	
     call spi_setup	;set up SPI tranmission
     call set_up_uart
+   
+    call uart_Esc
+    call uart_Esc
+    call start_uart0    ;0th UART image (instruction)
+    call uart_loop
     
-    call uart_Esc       ;clear screen
-    call start_uart0	;1st UART image 
+    call hugedelay 
+    call hugedelay
+    call hugedelay
+    call hugedelay 
+    call hugedelay
+    
+    call uart_Esc
+    call start_uart1	;1st UART image 
     call uart_loop	
     
+    call set_normal_mode
+    ;call set_sensitive_mode
+    ;call set_robust_mode
+    
     call set_up_acc	;manage configuration of accelerometer
-    ;call step_enable
     call reset_step	;reset step
     
-    call readfrom_acc
-   
+    
     call loop1	;loop to reach milestone step
     
     call uart_Esc       ;clear screen
-    call start_uart1	;2nd UART image
+    call start_uart2	;2nd UART image
     call uart_loop	
     
     call loop2	;loop to reach goal step
     
     call uart_Esc	 ;clear screen
-    call start_uart2	 ;3rd UART image
+    call start_uart3	 ;3rd UART image
     call uart_loop
-    ;movlw 0b10000000
-    ;call readfrom_acc
-    ;call loop2
+    
     goto $
  
 loop1: 
@@ -174,28 +185,77 @@ loop2:
     bra loop2
     return
     
- ;set up step counter to normal mode:     
-set_up_acc:             
-    ;Choose step config (step confi register 1)
+ 
+;set up step counter to normal mode: 
+ set_normal_mode:
+    ;Choose step config (step confi register 0)
     bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
     
     movlw step_conf0         ; Load accelerometer register address
     call spi_transmit_write      ; Write register address to acc
-    
-    movlw 0x2D       ; Load accelerometer register data
+    movlw 0x15       ; Normal mode config0
     call spi_transmit_write      ; Write register data to acc
     bsf PORTE, 0, A	; disable acc (cs pin connect to RE0)	    
     
-   ;Choose step config (step confi register 2)
+;Choose step config (step confi register 1)
     bcf PORTE, 0, A  
     movlw step_conf1         
-    call spi_transmit_write     
-    
-    movlw 0b00001000
+    call spi_transmit_write   
+    movlw 0b00001011    ; Normal mode config1
     call spi_transmit_write     
     bsf PORTE, 0, A
+    
+    return
+    
+;set up step counter to sensitive mode:    
+set_sensitive_mode:
+;Choose step config (step confi register 0)
+    bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
+    
+    movlw step_conf0         ; Load accelerometer register address
+    call spi_transmit_write      ; Write register address to acc
+ 
+    movlw 0x2D       ; Sensitive mode config0
+    call spi_transmit_write      ; Write register data to acc
+    bsf PORTE, 0, A	; disable acc (cs pin connect to RE0)	    
+    
+;Choose step config (step confi register 1)
+    bcf PORTE, 0, A  
+    movlw step_conf1         
+    call spi_transmit_write   
+    
+    movlw 0b00001000	; Sensitive mode config1
+    call spi_transmit_write     
+    bsf PORTE, 0, A
+    
+    return
 
-    ;Power mode : Suspend -> Normal mode (acceleration)  
+;set up step counter to robust mode:
+set_robust_mode: 
+;Choose step config (step confi register 0)
+    bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
+ 
+    movlw step_conf0         ; Load accelerometer register address
+    call spi_transmit_write      ; Write register address to acc
+    
+    movlw 0x1D       ; Robust mode config0   
+    call spi_transmit_write      ; Write register data to acc
+    bsf PORTE, 0, A	; disable acc (cs pin connect to RE0)	    
+    
+;Choose step config (step confi register 1)
+    bcf PORTE, 0, A  
+    movlw step_conf1         
+    call spi_transmit_write   
+    
+    movlw 0b00001111	; Robust mode config1
+    call spi_transmit_write     
+    bsf PORTE, 0, A
+    
+    return
+
+
+set_up_acc:             
+;Power mode : Suspend -> Normal mode (acceleration)  
     bcf PORTE, 0, A  
     movlw cmd      ;Address fo command reg (cmd) 
     call spi_transmit_write     
@@ -204,7 +264,7 @@ set_up_acc:
     call spi_transmit_write     
     bsf PORTE, 0, A
     
-    ;Power mode : Suspend -> Normal mode (gyro)  
+;Power mode : Suspend -> Normal mode (gyro)  
     bcf PORTE, 0, A  
     movlw cmd      ;Address fo command reg (cmd) 
     call spi_transmit_write     
@@ -213,7 +273,7 @@ set_up_acc:
     call spi_transmit_write     
     bsf PORTE, 0, A
     
-    ;Power mode : Suspend -> Normal mode (mag)  
+;Power mode : Suspend -> Normal mode (mag)  
     bcf PORTE, 0, A  
     movlw cmd      ;Address fo command reg (cmd) 
     call spi_transmit_write     
@@ -222,7 +282,7 @@ set_up_acc:
     call spi_transmit_write     
     bsf PORTE, 0, A
     
-    ;reset inerrupt pin
+;reset inerrupt pin
     bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
     movlw cmd
     ;movlw 0x57         ; Load accelerometer register address
@@ -233,7 +293,7 @@ set_up_acc:
     call spi_transmit_write      ; Write register data to acc
     bsf PORTE, 0, A	; disable acc (cs pin connect to RE0)
 
-    ;enable step detector
+;enable step detector
     bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
     
     movlw int_en2         ; Load accelerometer register address
@@ -243,7 +303,7 @@ set_up_acc:
     call spi_transmit_write      ; Write register data to acc
     bsf PORTE, 0, A	; disable acc (cs pin connect to RE0)	
    
-   ;enable inerrupt pin2
+;enable inerrupt pin2
     bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
     
     movlw int_out_ctrl         ; Load accelerometer register address
@@ -252,8 +312,8 @@ set_up_acc:
     movlw 0b10000000       ; Load accelerometer register data
     call spi_transmit_write      ; Write register data to acc
     bsf PORTE, 0, A	; disable acc (cs pin connect to RE0)
-;;    
-    ;map step detector to interrupt pin2
+    
+;map step detector to interrupt pin2
     bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
    
     movlw int_map2        ; Load accelerometer register address
@@ -306,7 +366,18 @@ set_up_uart:
 		call	UART_Setup	; setup UART
 		return
 
-		start_uart0: 	    ;load the initial egg
+start_uart0: 	    ;load the initial egg
+		lfsr	0, myArray	; Load FSR0 with address in RAM	
+		movlw	low highword(myTableI)	; address of data in PM
+		movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+		movlw	high(myTableI)	; address of data in PM
+		movwf	TBLPTRH, A		; load high byte to TBLPTRH
+		movlw	low(myTableI)	; address of data in PM
+		movwf	TBLPTRL, A		; load low byte to TBLPTRL
+		movlw	myTable_l	; bytes to read
+		movwf 	counter, A		; our counter register
+		return    		
+start_uart1: 	    ;load the initial egg
 		lfsr	0, myArray	; Load FSR0 with address in RAM	
 		movlw	low highword(myTableE)	; address of data in PM
 		movwf	TBLPTRU, A		; load upper bits to TBLPTRU
@@ -317,7 +388,7 @@ set_up_uart:
 		movlw	myTable_l	; bytes to read
 		movwf 	counter, A		; our counter register
 		return
-start_uart1: 	    ;load the initial egg
+start_uart2: 	    ;load the initial egg
 		lfsr	0, myArray	; Load FSR0 with address in RAM	
 		movlw	low highword(myTableEC)	; address of data in PM
 		movwf	TBLPTRU, A		; load upper bits to TBLPTRU
@@ -328,7 +399,7 @@ start_uart1: 	    ;load the initial egg
 		movlw	myTable_l	; bytes to read
 		movwf 	counter, A		; our counter register
 		return    
-start_uart2: 	    ;load the initial egg
+start_uart3: 	    ;load the initial egg
 		lfsr	0, myArray	; Load FSR0 with address in RAM	
 		movlw	low highword(myTableR)	; address of data in PM
 		movwf	TBLPTRU, A		; load upper bits to TBLPTRU

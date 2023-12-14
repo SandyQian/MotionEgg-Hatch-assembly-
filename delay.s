@@ -61,5 +61,29 @@ hugedelay:
 	call bbdelay
 	call bbdelay
 	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+        call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	call bbdelay
+	
 	return
     
