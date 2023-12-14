@@ -140,7 +140,9 @@ start:
     
     call set_up_acc	;manage configuration of accelerometer
     ;call step_enable
-    call reset_step	;reset step  
+    call reset_step	;reset step
+    
+    call readfrom_acc
    
     call loop1	;loop to reach milestone step
     
