@@ -114,7 +114,7 @@ myTableP:
 	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' '    ;7
 	db	0x0A, 0x0D,' ',' ',' ',' ','#','#',' ',' ',' ',' ',' ','#','#',' ',' ',' ',' ',' '    ;8
 	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;9
-	db  	0x0A, 0x0D,' ',' ',' ','G','A','M','E',' ','F','I','N','I','S','H','!',' ',' ',' '    ;10
+	db  	0x0A, 0x0D,' ',' ',' ','G','A','M','E',' ',' ','S','T','A','R','T','!',' ',' ',' '    ;10
 
 
 	myTable_l   EQU	200	; length of data
@@ -141,11 +141,6 @@ start:
     movwf TRISJ, A
     movlw 0x02
     movwf PORTJ, A
-    movlw 0x00
-    movwf TRISD, A
-    movlw 0x02
-    movwf PORTD, A
-    
     
     bcf	  TRISE, 0, A
 	
@@ -184,7 +179,8 @@ start:
     call loop2	;loop to reach goal step
     
     call uart_Esc	 ;clear screen
-    call random
+    call start_uart3	 ;3rd UART image
+    call uart_loop
     
     goto $
  
@@ -375,13 +371,6 @@ readfrom_acc:
     call spi_transmit_read      ; Read register data
     movwf PORTJ, A
     bsf PORTE, 0, A
-    
-    bcf PORTE, 0, A                       
-    movlw acc_x_0         
-    call spi_transmit_write     
-    call spi_transmit_read      ; Read register data
-    movwf PORTD, A
-    bsf PORTE, 0, A
     return 
 
 set_up_uart:
@@ -435,18 +424,6 @@ start_uart3: 	    ;load the initial egg
 		movwf 	counter, A		; our counter register
 		return
 
-start_uart4: 	    ;load the initial egg
-		lfsr	0, myArray	; Load FSR0 with address in RAM	
-		movlw	low highword(myTableP)	; address of data in PM
-		movwf	TBLPTRU, A		; load upper bits to TBLPTRU
-		movlw	high(myTableP)	; address of data in PM
-		movwf	TBLPTRH, A		; load high byte to TBLPTRH
-		movlw	low(myTableP)	; address of data in PM
-		movwf	TBLPTRL, A		; load low byte to TBLPTRL
-		movlw	myTable_l	; bytes to read
-		movwf 	counter, A		; our counter register
-		return
-
 uart_loop:   ;initial egg
 		tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 		movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
@@ -475,20 +452,7 @@ Escloop:
 	lfsr	2, EscArray
 	call	UART_Transmit_Message
 	return 
+		
 
-random: 
-    movlw   0b00000100
-    cpfslt  LATD, A        ;if LATD > W --> 3rd image; if LATD < W --> skip to 4th image
-    call uart4_only
-    call start_uart3
-    call uart_loop
-    return
-       
-uart4_only:
-    call start_uart4	 ;3rd UART image
-    call uart_loop
-    return
-    ;movlw   0b00001000
-    ;cpfslt  LATD
     
 end main
