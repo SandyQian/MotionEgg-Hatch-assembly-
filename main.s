@@ -65,14 +65,14 @@ start:
     
     
     
-    ;call readfrom_acc
+    call readfrom_acc
     ;call combine_bit
-    call loop1
+    ;call loop1
     ;movwf PORTH, A
     ;call loop1	;loop to reach milestone step
     ;call loop2	;loop to reach goal step
     
-    goto $
+    goto 0x00
  
 loop1: 
     ;call bbdelay
