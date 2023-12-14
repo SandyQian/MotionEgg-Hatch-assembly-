@@ -11,6 +11,7 @@ data_from_acc_z0:    ds 1
 data_from_acc_z1:    ds 1   
 counter:    ds 1    ; reserve one byte for a counter variable
 delay_count:ds 1    ; reserve one byte for counter in the delay routine
+random:	    ds 1
     
     ;for data write
     control_byte equ 0b01000000   ;write to & 0x40 => 0 1000000
@@ -187,7 +188,7 @@ loop2:
     
  
 ;set up step counter to normal mode: 
- set_normal_mode:
+set_normal_mode:
     ;Choose step config (step confi register 0)
     bcf PORTE, 0, A	 ;enable acce (cs pin connect to RE0)
     
@@ -361,85 +362,83 @@ readfrom_acc:
     return 
 
 set_up_uart:
-		bcf	CFGS	; point to Flash program memory  
-		bsf	EEPGD 	; access Flash program memory
-		call	UART_Setup	; setup UART
-		return
+    bcf	CFGS	; point to Flash program memory  
+    bsf	EEPGD 	; access Flash program memory
+    call	UART_Setup	; setup UART
+    return
 
 start_uart0: 	    ;load the initial egg
-		lfsr	0, myArray	; Load FSR0 with address in RAM	
-		movlw	low highword(myTableI)	; address of data in PM
-		movwf	TBLPTRU, A		; load upper bits to TBLPTRU
-		movlw	high(myTableI)	; address of data in PM
-		movwf	TBLPTRH, A		; load high byte to TBLPTRH
-		movlw	low(myTableI)	; address of data in PM
-		movwf	TBLPTRL, A		; load low byte to TBLPTRL
-		movlw	myTable_l	; bytes to read
-		movwf 	counter, A		; our counter register
-		return    		
+    lfsr	0, myArray	; Load FSR0 with address in RAM	
+    movlw	low highword(myTableI)	; address of data in PM
+    movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+    movlw	high(myTableI)	; address of data in PM
+    movwf	TBLPTRH, A		; load high byte to TBLPTRH
+    movlw	low(myTableI)	; address of data in PM
+    movwf	TBLPTRL, A		; load low byte to TBLPTRL
+    movlw	myTable_l	; bytes to read
+    movwf 	counter, A		; our counter register
+    return    		
 start_uart1: 	    ;load the initial egg
-		lfsr	0, myArray	; Load FSR0 with address in RAM	
-		movlw	low highword(myTableE)	; address of data in PM
-		movwf	TBLPTRU, A		; load upper bits to TBLPTRU
-		movlw	high(myTableE)	; address of data in PM
-		movwf	TBLPTRH, A		; load high byte to TBLPTRH
-		movlw	low(myTableE)	; address of data in PM
-		movwf	TBLPTRL, A		; load low byte to TBLPTRL
-		movlw	myTable_l	; bytes to read
-		movwf 	counter, A		; our counter register
-		return
+    lfsr	0, myArray	; Load FSR0 with address in RAM	
+    movlw	low highword(myTableE)	; address of data in PM
+    movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+    movlw	high(myTableE)	; address of data in PM
+    movwf	TBLPTRH, A		; load high byte to TBLPTRH
+    movlw	low(myTableE)	; address of data in PM
+    movwf	TBLPTRL, A		; load low byte to TBLPTRL
+    movlw	myTable_l	; bytes to read
+    movwf 	counter, A		; our counter register
+    return
 start_uart2: 	    ;load the initial egg
-		lfsr	0, myArray	; Load FSR0 with address in RAM	
-		movlw	low highword(myTableEC)	; address of data in PM
-		movwf	TBLPTRU, A		; load upper bits to TBLPTRU
-		movlw	high(myTableEC)	; address of data in PM
-		movwf	TBLPTRH, A		; load high byte to TBLPTRH
-		movlw	low(myTableEC)	; address of data in PM
-		movwf	TBLPTRL, A		; load low byte to TBLPTRL
-		movlw	myTable_l	; bytes to read
-		movwf 	counter, A		; our counter register
-		return    
+    lfsr	0, myArray	; Load FSR0 with address in RAM	
+    movlw	low highword(myTableEC)	; address of data in PM
+    movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+    movlw	high(myTableEC)	; address of data in PM
+    movwf	TBLPTRH, A		; load high byte to TBLPTRH
+    movlw	low(myTableEC)	; address of data in PM
+    movwf	TBLPTRL, A		; load low byte to TBLPTRL
+    movlw	myTable_l	; bytes to read
+    movwf 	counter, A		; our counter register
+    return    
 start_uart3: 	    ;load the initial egg
-		lfsr	0, myArray	; Load FSR0 with address in RAM	
-		movlw	low highword(myTableR)	; address of data in PM
-		movwf	TBLPTRU, A		; load upper bits to TBLPTRU
-		movlw	high(myTableR)	; address of data in PM
-		movwf	TBLPTRH, A		; load high byte to TBLPTRH
-		movlw	low(myTableR)	; address of data in PM
-		movwf	TBLPTRL, A		; load low byte to TBLPTRL
-		movlw	myTable_l	; bytes to read
-		movwf 	counter, A		; our counter register
-		return
+    lfsr	0, myArray	; Load FSR0 with address in RAM	
+    movlw	low highword(myTableR)	; address of data in PM
+    movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+    movlw	high(myTableR)	; address of data in PM
+    movwf	TBLPTRH, A		; load high byte to TBLPTRH
+    movlw	low(myTableR)	; address of data in PM
+    movwf	TBLPTRL, A		; load low byte to TBLPTRL
+    movlw	myTable_l	; bytes to read
+    movwf 	counter, A		; our counter register
+    return
 
 uart_loop:   ;initial egg
-		tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
-		movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
-		decfsz	counter, A		; count down to zero
-		bra	uart_loop		; keep going until finished
-			
-		movlw	myTable_l	; output message to UART
-		lfsr	2, myArray
-		call	UART_Transmit_Message
-		return
+    tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+    movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
+    decfsz	counter, A		; count down to zero
+    bra	uart_loop		; keep going until finished
+
+    movlw	myTable_l	; output message to UART
+    lfsr	2, myArray
+    call	UART_Transmit_Message
+    return
 
 uart_Esc:	lfsr	0,  EscArray	; Load FSR0 with address in RAM	
-	movlw	high(EscTbl)	; address of data in PM
-	movwf	TBLPTRH, A		; load high byte to TBLPTRH
-	movlw	low(EscTbl)	; address of data in PM
-	movwf	TBLPTRL, A		; load low byte to TBLPTRL
-	movlw	EscTbl_l	; bytes to read
-	movwf 	counter, A		; our counter register
+    movlw	high(EscTbl)	; address of data in PM
+    movwf	TBLPTRH, A		; load high byte to TBLPTRH
+    movlw	low(EscTbl)	; address of data in PM
+    movwf	TBLPTRL, A		; load low byte to TBLPTRL
+    movlw	EscTbl_l	; bytes to read
+    movwf 	counter, A		; our counter register
 Escloop: 	
-	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
-	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
-	decfsz	counter, A		; count down to zero
-	bra	Escloop		; keep going until finished
-	
-	movlw	EscTbl_l	; output message to UART
-	lfsr	2, EscArray
-	call	UART_Transmit_Message
-	return 
-		
+    tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+    movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
+    decfsz	counter, A		; count down to zero
+    bra	Escloop		; keep going until finished
 
-    
+    movlw	EscTbl_l	; output message to UART
+    lfsr	2, EscArray
+    call	UART_Transmit_Message
+    return 
+	
 end main
