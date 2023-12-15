@@ -18,6 +18,8 @@
       <itemPath>LCD.s</itemPath>
       <itemPath>SPI.s</itemPath>
       <itemPath>delay.s</itemPath>
+      <itemPath>acc.s</itemPath>
+      <itemPath>screen_print.s</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
