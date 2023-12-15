@@ -1,7 +1,7 @@
 #include <xc.inc>
 
 extrn UART_Setup, UART_Transmit_Message
-global set_up_uart, print_I, print_E, print_EC, print_R, print_P, clear_screen
+global set_up_uart, print_I, print_E, print_EC, print_R, print_P, print_C, print_F, clear_screen
 
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 myArray:    ds 0x80 ; reserve 128 bytes for message data
@@ -79,7 +79,37 @@ myTableP:
 	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' '    ;7
 	db	0x0A, 0x0D,' ',' ',' ',' ','#','#',' ',' ',' ',' ',' ','#','#',' ',' ',' ',' ',' '    ;8
 	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;9
-	db  	0x0A, 0x0D,' ',' ',' ','G','A','M','E',' ',' ','S','T','A','R','T','!',' ',' ',' '    ;10
+	db  	0x0A, 0x0D,' ',' ','G','A','M','E',' ','F','I','N','I','S','H','!',' ',' ',' ',' '   ;10
+
+;the third animal
+myTableC:                                                                                                           
+	           ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R'   
+	db  	0x0A, 0x0D,' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' '    ;1
+	db  	0x0A, 0x0D,' ',' ',' ','#',' ','#',' ',' ',' ',' ','#',' ','#',' ',' ',' ',' ',' '    ;2
+	db	0x0A, 0x0D,' ',' ','#','#',' ','#','#','#','#','#','#',' ','#','#',' ',' ',' ',' '    ;3
+	db	0x0A, 0x0D,' ',' ','#',' ','>',' ',' ',' ',' ',' ',' ','<',' ','#',' ',' ',' ',' '    ;4  
+	db	0x0A, 0x0D,' ',' ','#',' ',' ',' ',' ','-','-',' ',' ',' ',' ','#',' ',' ',' ',' '    ;5
+	db	0x0A, 0x0D,' ',' ','#','#','#','#','#','#','#','#','#','#','#','#',' ',' ',' ',' '    ;6
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ','#',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' '    ;7
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#',' ',' ',' ',' ','#',' ','#',' ',' ',' ',' ',' '    ;8
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;9
+	db  	0x0A, 0x0D,' ',' ','G','A','M','E',' ','F','I','N','I','S','H','!',' ',' ',' ',' '   ;10
+
+;the fourth animal
+myTableF:                                                                                                           
+	           ;'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R'   
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#','#','#','#','#','#','#',' ',' ',' ',' ',' ',' '    ;1
+	db	0x0A, 0x0D,'h','a',' ','#','#',' ',' ',' ',' ',' ',' ',' ','#','#',' ',' ',' ',' '    ;2
+	db	0x0A, 0x0D,' ',' ','#',' ',' ','.',' ',' ',' ',' ',' ','.',' ',' ','#',' ',' ',' '    ;3
+	db	0x0A, 0x0D,'#','#','#',' ',' ',' ',' ',' ','-',' ',' ',' ',' ',' ','#','#','#',' '    ;4  
+	db	0x0A, 0x0D,' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' '    ;5
+	db	0x0A, 0x0D,' ',' ',' ','#','#','#','#','#','#','#','#','#','#','#',' ',' ',' ',' '    ;6
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' '    ;7
+	db	0x0A, 0x0D,' ',' ',' ',' ','#','#',' ',' ',' ',' ',' ','#','#',' ',' ',' ',' ',' '    ;8
+	db	0x0A, 0x0D,' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '    ;9
+	db  	0x0A, 0x0D,' ',' ','G','A','M','E',' ','F','I','N','I','S','H','!',' ',' ',' ',' '   ;10
+	
+	
 
 
 	myTable_l   EQU	200	; length of data
@@ -96,26 +126,44 @@ set_up_uart:
     bsf	EEPGD 	; access Flash program memory
     call	UART_Setup	; setup UART
     return
+
 print_I:        ;print out instruction table 
     call start_uart0
     call uart_loop
     return 
+
 print_E:	;print egg table 
     call start_uart1
     call uart_loop
     return
+
 print_EC:	;print egg-with-cracks table 
     call start_uart2
     call uart_loop
     return
+
 print_R:	;print rabbit table 
     call start_uart3
     call uart_loop
     return
+
 print_P:
     call start_uart4
     call uart_loop
     return
+    
+print_C:
+    call start_uart5
+    call uart_loop
+    return
+    
+print_F:
+    call start_uart6
+    call uart_loop
+    return
+    
+    
+
 clear_screen:   ;clear screen using VT100 escape code 
     call uart_Esc
     call Escloop
@@ -144,7 +192,7 @@ start_uart1: 	    ;load the initial egg
     movwf 	counter, A		; our counter register
     return
     
-start_uart2: 	    ;load the initial egg
+start_uart2: 	    ;load the cracked egg
     lfsr	0, myArray	; Load FSR0 with address in RAM	
     movlw	low highword(myTableEC)	; address of data in PM
     movwf	TBLPTRU, A		; load upper bits to TBLPTRU
@@ -156,7 +204,7 @@ start_uart2: 	    ;load the initial egg
     movwf 	counter, A		; our counter register
     return   
     
-start_uart3: 	    ;load the initial egg
+start_uart3: 	    ;load the rabbit
     lfsr	0, myArray	; Load FSR0 with address in RAM	
     movlw	low highword(myTableR)	; address of data in PM
     movwf	TBLPTRU, A		; load upper bits to TBLPTRU
@@ -168,13 +216,38 @@ start_uart3: 	    ;load the initial egg
     movwf 	counter, A		; our counter register
     return
 
-start_uart4:
+start_uart4:	;load the penguin
     lfsr	0, myArray	; Load FSR0 with address in RAM	
     movlw	low highword(myTableP)	; address of data in PM
     movwf	TBLPTRU, A		; load upper bits to TBLPTRU
     movlw	high(myTableP)	; address of data in PM
     movwf	TBLPTRH, A		; load high byte to TBLPTRH
     movlw	low(myTableP)	; address of data in PM
+    movwf	TBLPTRL, A		; load low byte to TBLPTRL
+    movlw	myTable_l	; bytes to read
+    movwf 	counter, A		; our counter register
+    return
+    
+start_uart5:	;load the penguin
+    lfsr	0, myArray	; Load FSR0 with address in RAM	
+    movlw	low highword(myTableC)	; address of data in PM
+    movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+    movlw	high(myTableC)	; address of data in PM
+    movwf	TBLPTRH, A		; load high byte to TBLPTRH
+    movlw	low(myTableC)	; address of data in PM
+    movwf	TBLPTRL, A		; load low byte to TBLPTRL
+    movlw	myTable_l	; bytes to read
+    movwf 	counter, A		; our counter register
+    return
+    
+    
+start_uart6:	;load the penguin
+    lfsr	0, myArray	; Load FSR0 with address in RAM	
+    movlw	low highword(myTableF)	; address of data in PM
+    movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+    movlw	high(myTableF)	; address of data in PM
+    movwf	TBLPTRH, A		; load high byte to TBLPTRH
+    movlw	low(myTableF)	; address of data in PM
     movwf	TBLPTRL, A		; load low byte to TBLPTRL
     movlw	myTable_l	; bytes to read
     movwf 	counter, A		; our counter register
