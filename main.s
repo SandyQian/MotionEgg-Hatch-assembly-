@@ -156,19 +156,18 @@ start:
     call hugedelay
     call hugedelay
     call hugedelay 
-    call hugedelay
     
+    call set_up_acc	;manage configuration of accelerometer
+    call set_normal_mode
+    ;call set_sensitive_mode
+    ;call set_robust_mode
+   
     call uart_Esc
     call start_uart1	;1st UART image 
     call uart_loop	
     
-    call set_normal_mode
-    ;call set_sensitive_mode
-    ;call set_robust_mode
-    
-    call set_up_acc	;manage configuration of accelerometer
     call reset_step	;reset step
-    
+ 
     call readfrom_acc
     call loop1	;loop to reach milestone step
     
@@ -182,7 +181,7 @@ start:
     call start_uart3	 ;3rd UART image
     call uart_loop
     
-    goto $
+    goto 0x00
  
 loop1: 
     call readfrom_acc
@@ -282,7 +281,7 @@ set_up_acc:
     movlw cmd      ;Address fo command reg (cmd) 
     call spi_transmit_write     
     
-    movlw 0b00010101      ;Sets the PMU mode for the accelerometer to normal (01 end)    
+    movlw 0b00010101      ;Sets the PMU mode for the gyroscope to normal (01 end)    
     call spi_transmit_write     
     bsf PORTE, 0, A
     
@@ -291,7 +290,7 @@ set_up_acc:
     movlw cmd      ;Address fo command reg (cmd) 
     call spi_transmit_write     
     
-    movlw 0b000011001      ;Sets the PMU mode for the accelerometer to normal (01 end)    
+    movlw 0b000011001      ;Sets the PMU mode for the magnetometer to normal (01 end)    
     call spi_transmit_write     
     bsf PORTE, 0, A
     
