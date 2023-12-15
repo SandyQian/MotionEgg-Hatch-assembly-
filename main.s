@@ -290,7 +290,7 @@ set_up_acc:
     movlw cmd      ;Address fo command reg (cmd) 
     call spi_transmit_write     
     
-    movlw 0b000011001      ;Sets the PMU mode for the magnetometer to normal (01 end)    
+    movlw 0b00011001      ;Sets the PMU mode for the magnetometer to normal (01 end)    
     call spi_transmit_write     
     bsf PORTE, 0, A
     
