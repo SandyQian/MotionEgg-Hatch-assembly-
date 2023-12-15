@@ -9,22 +9,13 @@ extrn   set_up_acc, reset_step, readfrom_acc, set_normal_mode,set_sensitive_mode
 extrn   set_pmu, reset_int, enable_step_detector, enable_int, map_int
 
 extrn	set_up_uart, print_I, print_E, print_EC, print_R, print_P, print_C, print_F, clear_screen
-	
-;psect	udata_acs   ; reserve data space in access ram
-    
+	    
 psect	udata_acs   ; reserve data space in access ram
 delay_count:ds 1    ; reserve one byte for counter in the delay routine
-    
-    ;for data write
-    control_byte equ 0b01000000   ;write to & 0x40 => 0 1000000
-    ;for data read
-    control_byte2 equ 0b10000000   ;read from & 0x78 => 1 1000000
-  
+ 
     milestone_step equ 0x0F     ;15 high-knees to make crack on egg
-    goal_step equ 0x1E		;30 high-knees to hatch the egg
-    ;goal_step equ 0x3	
-
-      
+    goal_step equ 0x1E		;30 high-knees to hatch the egg	
+    
 psect	code, abs ;class=CODE   	
 
 main:
@@ -61,8 +52,8 @@ start:
     call hugedelay 
     
     call set_up_acc	;manage configuration of accelerometer
-    ;call set_normal_mode
-    call set_sensitive_mode
+    call set_normal_mode
+    ;call set_sensitive_mode
     ;call set_robust_mode
    
     call clear_screen
@@ -81,7 +72,8 @@ start:
     call final_print	 ;3rd UART image
     
     goto $
- 
+
+;read from the step counter till milestones sep reached   
 loop1: 
     call set_pmu        ;needed for the measurement unit to function normally 
     call readfrom_acc
@@ -89,14 +81,17 @@ loop1:
     cpfsgt LATH, A
     bra loop1
     return
+
     
+;read from the step counter to reach the goal step   
 loop2:    
     call readfrom_acc
     movlw goal_step
     cpfsgt LATH, A
     bra loop2
     return
-    
+
+;showing the animals based on the two LSB from x-acc data
 final_print:
     call readfrom_acc
     movlw 0b00000000
@@ -107,7 +102,7 @@ final_print:
     call final_print2
     return
     
-    	 ;3rd UART image
+    	 
 final_print1: 
     movlw 0b00000000
     cpfseq LATB, A
