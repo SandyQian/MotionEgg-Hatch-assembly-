@@ -8,6 +8,8 @@ global	set_normal_mode,set_sensitive_mode, set_robust_mode
 global  set_pmu, reset_int, enable_step_detector, enable_int, map_int	
 	
 psect	udata_acs   ; reserve data space in access ram
+data_from_acc_x0:    ds 1   
+data_from_acc_x1:    ds 1	    
 	;for data write
     control_byte equ 0b01000000   ;write to & 0x40 => 0 1000000
     ;for data read
@@ -141,10 +143,21 @@ readfrom_acc:
     nop
     
     bcf PORTE, 0, A                       
-    movlw acc_y_1         
+    movlw acc_x_0         
     call spi_transmit_write     
     call spi_transmit_read      ; Read register data
+    andlw 0b00000011
+    movwf data_from_acc_x0
+   
+    movf data_from_acc_x0, W, A
+    andlw 0b00000001
     movwf PORTJ, A
+    
+    movf data_from_acc_x0, W, A
+    andlw 0b00000010
+    movwf PORTB, A
+    
+ 
     bsf PORTE, 0, A
     return 
     

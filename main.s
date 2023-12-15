@@ -6,13 +6,11 @@ extrn   delay, bdelay, bbdelay, hugedelay
     
 extrn   set_up_acc, reset_step, readfrom_acc, set_normal_mode,set_sensitive_mode, set_robust_mode
 extrn   set_pmu, reset_int, enable_step_detector, enable_int, map_int
-extrn	set_up_uart, print_I, print_E, print_EC, print_R, clear_screen
+extrn	set_up_uart, print_I, print_E, print_EC, print_R, print_P, clear_screen
 	
 ;psect	udata_acs   ; reserve data space in access ram
     
 psect	udata_acs   ; reserve data space in access ram
-data_from_acc_z0:    ds 1   
-data_from_acc_z1:    ds 1  
 delay_count:ds 1    ; reserve one byte for counter in the delay routine
     
     ;for data write
@@ -20,9 +18,9 @@ delay_count:ds 1    ; reserve one byte for counter in the delay routine
     ;for data read
     control_byte2 equ 0b10000000   ;read from & 0x78 => 1 1000000
   
-    milestone_step equ 0x0F     ;15 high-knees to make crack on egg
-    goal_step equ 0x1E		;30 high-knees to hatch the egg
-
+    milestone_step equ 0x01 ;0x0F     ;15 high-knees to make crack on egg
+    ;goal_step equ 0x1E		;30 high-knees to hatch the egg
+    goal_step equ 0x3	
 
       
 psect	code, abs ;class=CODE   	
@@ -41,6 +39,10 @@ start:
     movwf TRISJ, A
     movlw 0x02
     movwf PORTJ, A
+    movlw 0x00
+    movwf TRISB, A
+    movlw 0x02
+    movwf PORTB, A
     
     bcf	  TRISE, 0, A
 	
@@ -51,14 +53,14 @@ start:
     call clear_screen
     call print_I    ;print game name and instruction
     
-    call hugedelay 
-    call hugedelay
-    call hugedelay
+    ;call hugedelay 
+    ;call hugedelay
+    ;call hugedelay
     call hugedelay 
     
     call set_up_acc	;manage configuration of accelerometer
-    call set_normal_mode
-    ;call set_sensitive_mode
+    ;call set_normal_mode
+    call set_sensitive_mode
     ;call set_robust_mode
    
     call clear_screen
@@ -67,12 +69,14 @@ start:
     call reset_step	;reset step
 
     call loop1	;loop to reach milestone step
+    
     call clear_screen      
     call print_EC	;print egg-crack table 
     
     call loop2	;loop to reach goal step
+     
     call clear_screen	 ;clear screen
-    call print_R	 ;3rd UART image
+    call final_print	 ;3rd UART image
     
     goto $
  
@@ -89,6 +93,35 @@ loop2:
     movlw goal_step
     cpfsgt LATH, A
     bra loop2
+    return
+    
+final_print:
+    call readfrom_acc
+    movlw 0b00000000
+    cpfseq LATJ, A
+    call final_print1
+    movlw 0b00000000
+    cpfsgt LATJ, A
+    call final_print2
+    return
+    
+    	 ;3rd UART image
+final_print1: 
+    movlw 0b00000000
+    cpfseq LATB, A
+    call print_R
+    movlw 0b00000000
+    cpfsgt LATB, A
+    call print_P
+    return
+     
+final_print2:
+    movlw 0b00000000
+    cpfseq LATB, A
+    call print_E
+    movlw 0b00000000
+    cpfsgt LATB, A
+    call print_EC
     return
 
     

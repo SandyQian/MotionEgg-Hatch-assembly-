@@ -1,7 +1,7 @@
 #include <xc.inc>
 
 extrn UART_Setup, UART_Transmit_Message
-global set_up_uart, print_I, print_E, print_EC, print_R, clear_screen
+global set_up_uart, print_I, print_E, print_EC, print_R, print_P, clear_screen
 
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 myArray:    ds 0x80 ; reserve 128 bytes for message data
@@ -112,6 +112,10 @@ print_R:	;print rabbit table
     call start_uart3
     call uart_loop
     return
+print_P:
+    call start_uart4
+    call uart_loop
+    return
 clear_screen:   ;clear screen using VT100 escape code 
     call uart_Esc
     call Escloop
@@ -163,6 +167,19 @@ start_uart3: 	    ;load the initial egg
     movlw	myTable_l	; bytes to read
     movwf 	counter, A		; our counter register
     return
+
+start_uart4:
+    lfsr	0, myArray	; Load FSR0 with address in RAM	
+    movlw	low highword(myTableP)	; address of data in PM
+    movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+    movlw	high(myTableP)	; address of data in PM
+    movwf	TBLPTRH, A		; load high byte to TBLPTRH
+    movlw	low(myTableP)	; address of data in PM
+    movwf	TBLPTRL, A		; load low byte to TBLPTRL
+    movlw	myTable_l	; bytes to read
+    movwf 	counter, A		; our counter register
+    return
+    
 uart_loop:   ;initial egg
     tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
     movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
