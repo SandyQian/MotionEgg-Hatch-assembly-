@@ -59,7 +59,7 @@ start:
 	
     call spi_setup	;set up SPI tranmission
     call set_up_acc	;manage configuration of accelerometer
-    call step_enable
+    ;call step_enable
     call reset_step	;reset step
     ;call bbdelay   
     
