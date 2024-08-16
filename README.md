@@ -1,8 +1,5 @@
 # Microprocessors
 Repository for Physics Year 3 microprocessors lab
 
-A simple assembly program for PIC18 microprocessor
+A simple assembly game program for PIC18 microprocessor that display egg-hatching animation as recording step counts.
 
-Reads a table (message) from programme memory to data memory
-
-Initialises UART and writes a message (the table) to UART 
